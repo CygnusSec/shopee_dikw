@@ -1,0 +1,17 @@
+check_name,status,error_count,description
+shops_required_columns,PASS,0,Required schema
+products_required_columns,PASS,0,Required schema
+reviews_required_columns,PASS,0,Required schema
+reviews_has_rows,WARNING,0,No real records supplied
+unique_Shop_ID,PASS,0,Shop_ID unique
+unique_product_id,PASS,0,product_id unique
+unique_review_id,PASS,0,review_id unique
+shop_rating_range,PASS,0,"Rating_Average in [0,5]"
+response_rate_range,PASS,0,"Response rate in [0,100]"
+product_rating_range,PASS,0,"Review_stars in [0,5]"
+review_rating_range,PASS,0,"rating in [1,5]"
+review_has_image,PASS,0,has_image binary
+product_shop_fk,PASS,0,Product Shop FK
+review_shop_fk,PASS,0,Review Shop FK
+review_product_fk,PASS,0,Review Product FK
+review_product_shop_match,PASS,0,Review.Shop_ID matches Product.Shop_ID

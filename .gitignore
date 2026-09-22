@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.DS_Store
+output/logs/*.log
+output/models/*.joblib
+output/figures/*.png
+output/.matplotlib/
+*.zip

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["Shop_ID", "product_id", "product_name", "product_details", "description_text", "Review_stars"],
+    "properties": {
+      "Shop_ID": {"type": "string", "pattern": "^[^_]+_[^_]+$"},
+      "product_id": {"type": "string", "pattern": "^sp_"},
+      "product_name": {"type": "string"},
+      "product_details": {"type": "object"},
+      "description_text": {"type": "string"},
+      "Review_stars": {"type": "number", "minimum": 0, "maximum": 5}
+    }
+  }
+}
