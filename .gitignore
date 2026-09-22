@@ -8,3 +8,4 @@ output/models/*.joblib
 output/figures/*.png
 output/.matplotlib/
 *.zip
+.shopee_browser_profile/

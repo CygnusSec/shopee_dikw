@@ -18,6 +18,8 @@ Windows activation: `.venv\Scripts\activate`.
 
 Open Jupyter and run the notebooks in `src/` sequentially from `00_data_validation.ipynb` through `06_final_analysis.ipynb`.
 
+Review thật được thu thập bằng notebook `src/crawl_data/collect_shopee_reviews.ipynb`; xem `src/crawl_data/README.md` trước khi chạy.
+
 The raw workbook initially contains headers only. Add genuine records plus matching Product and Review JSON files. After clustering, inspect the profile and enter a human-confirmed mapping in config. Classification requires the manually reviewed `output/labeling/Data_Labeled.csv`.
 
 ## Google Colab
