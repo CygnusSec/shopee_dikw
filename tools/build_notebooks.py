@@ -316,6 +316,7 @@ K-Means detects behavioral patterns, not proof of fake reviews. Cluster meaning 
 code(r'''
 import os
 os.environ.setdefault("MPLCONFIGDIR", str(OUTPUT / ".matplotlib"))
+os.environ.setdefault("LOKY_MAX_CPU_COUNT", "1")
 import joblib, matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
@@ -325,22 +326,42 @@ from sklearn.preprocessing import StandardScaler
 reviews = pd.read_csv(PROCESSED / "reviews_clean.csv")
 features = CONFIG["clustering"]["features"]
 numeric_features = reviews[features].apply(pd.to_numeric, errors="coerce")
-complete = numeric_features.notna().all(axis=1)
-if (~complete).any(): print(f"Excluded {(~complete).sum()} reviews with unverified clustering features; values were not imputed.")
+feature_coverage = pd.DataFrame({
+    "Feature": features,
+    "Observed_Count": [numeric_features[c].notna().sum() for c in features],
+    "Observed_Rate": [numeric_features[c].notna().mean() for c in features],
+    "Unique_Observed_Values": [numeric_features[c].nunique(dropna=True) for c in features],
+})
+feature_coverage["Usable"] = (feature_coverage["Observed_Count"] >= 3) & (feature_coverage["Unique_Observed_Values"] >= 2)
+feature_coverage.to_csv(OUTPUT / "reports" / "cluster_feature_coverage.csv", index=False)
+active_features = feature_coverage.loc[feature_coverage["Usable"], "Feature"].tolist()
+missing_required = [c for c in features if c not in active_features]
+if missing_required:
+    print("EXPLORATORY FALLBACK: unavailable/non-varying required features were excluded:", missing_required)
+    print("This run is not submission-ready until all four required features are observed.")
+if not active_features:
+    raise ValueError("No observed clustering feature has enough coverage and variation")
+complete = numeric_features[active_features].notna().all(axis=1)
+if (~complete).any(): print(f"Excluded {(~complete).sum()} reviews with missing active features; values were not imputed.")
 reviews = reviews.loc[complete].copy()
-X = numeric_features.loc[complete]
-if len(X) < max(3, CONFIG["clustering"]["n_clusters"]): raise ValueError("Insufficient reviews for clustering")
+X = numeric_features.loc[complete, active_features]
+if len(X) < 3: raise ValueError("Insufficient reviews for exploratory clustering")
+distinct_rows = len(X.drop_duplicates())
+if distinct_rows < 2: raise ValueError("Observed clustering features contain fewer than two distinct patterns")
 scaled = StandardScaler().fit_transform(X)
 rows = []
 for k in CONFIG["clustering"]["k_candidates"]:
-    if 2 <= k < len(X):
+    if 2 <= k < len(X) and k <= distinct_rows:
         model = KMeans(n_clusters=k, random_state=CONFIG["project"]["random_state"], n_init=20).fit(scaled)
         rows.append({"k":k,"inertia":model.inertia_,"silhouette":silhouette_score(scaled,model.labels_)})
 evaluation = pd.DataFrame(rows)
 evaluation.to_csv(OUTPUT / "reports" / "cluster_k_evaluation.csv", index=False)
 fig, axes = plt.subplots(1,2,figsize=(10,4)); axes[0].plot(evaluation["k"],evaluation["inertia"],marker="o"); axes[0].set_title("Elbow"); axes[1].plot(evaluation["k"],evaluation["silhouette"],marker="o"); axes[1].set_title("Silhouette"); fig.tight_layout(); fig.savefig(OUTPUT / "figures" / "cluster_selection.png",dpi=160); plt.show(); plt.close(fig)
 
-pipeline = Pipeline([("scaler",StandardScaler()),("model",KMeans(n_clusters=CONFIG["clustering"]["n_clusters"],random_state=CONFIG["project"]["random_state"],n_init=20))])
+selected_k = min(CONFIG["clustering"]["n_clusters"], distinct_rows, len(X)-1)
+selected_k = max(2, selected_k)
+print({"mode":"FULL" if not missing_required else "EXPLORATORY_PARTIAL_FEATURES", "active_features":active_features, "selected_k":selected_k})
+pipeline = Pipeline([("scaler",StandardScaler()),("model",KMeans(n_clusters=selected_k,random_state=CONFIG["project"]["random_state"],n_init=20))])
 reviews["Cluster_Label"] = pipeline.fit_predict(X)
 joblib.dump(pipeline, OUTPUT / "models" / "kmeans_reviews.joblib")
 '''),
