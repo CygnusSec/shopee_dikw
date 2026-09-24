@@ -1,4 +1,4 @@
-THREE_DATA_TYPES               FAIL
+THREE_DATA_TYPES               PASS
 MINIMUM_SHOPS                  FAIL
 SELLER_METRICS                 FAIL
 POWER_BI                       FAIL

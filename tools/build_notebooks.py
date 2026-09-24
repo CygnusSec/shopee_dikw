@@ -77,6 +77,24 @@ shops = pd.read_excel(project_path("shops"), dtype={"Shop_ID": str})
 products = load_json_folder(project_path("products"), "shop_*_products.json", PRODUCT_REQUIRED)
 reviews = load_json_folder(project_path("reviews"), "shop_*_reviews.json", REVIEW_REQUIRED)
 seller_metrics, seller_source = load_seller_metrics(project_path("seller_metrics"))
+
+# Canonicalize legacy/manual collection fields without inventing business values.
+manifest_path = PROJECT_ROOT / "src" / "crawl_data" / "product_review_mapping.json"
+if manifest_path.exists():
+    manifest = pd.DataFrame(json.loads(manifest_path.read_text(encoding="utf-8")))
+    if {"product_id", "product_url"} <= set(manifest):
+        url_map = manifest.drop_duplicates("product_id").set_index("product_id")["product_url"]
+        if "product_url" not in products: products["product_url"] = products["product_id"].map(url_map)
+        else: products["product_url"] = products["product_url"].fillna(products["product_id"].map(url_map))
+shop_dates = shops.set_index("Shop_ID")["Time_Collected"].to_dict() if {"Shop_ID", "Time_Collected"} <= set(shops) else {}
+for column in PRODUCT_REQUIRED:
+    if column not in products: products[column] = np.nan
+products["Time_Collected"] = products["Time_Collected"].fillna(products["Shop_ID"].map(shop_dates))
+products["Data_Source"] = products["Data_Source"].fillna("Shopee public listing (legacy/manual collection)")
+for column in REVIEW_REQUIRED:
+    if column not in reviews: reviews[column] = np.nan
+if "collection_date" in reviews: reviews["review_time"] = reviews["review_time"].fillna(reviews["collection_date"])
+if "source_url" in reviews: reviews["Data_Source"] = reviews["Data_Source"].fillna(reviews["source_url"])
 print({"shops": len(shops), "products": len(products), "reviews": len(reviews), "seller_metrics": len(seller_metrics)})
 '''
 
@@ -106,13 +124,21 @@ if not missing_count(shops, SHOP_REQUIRED):
     check("shop_dates", "FAIL", pd.to_datetime(shops["Time_Collected"], errors="coerce").isna().sum(), "Time_Collected must be a date")
 if not missing_count(products, PRODUCT_REQUIRED):
     check("unique_product_id", "FAIL", products["product_id"].duplicated().sum(), "product_id must be globally unique")
-    check("product_rating_range", "FAIL", (~pd.to_numeric(products["Review_stars"], errors="coerce").between(0, 5)).sum(), "Review_stars in [0,5]")
-    check("product_units_sold", "FAIL", (pd.to_numeric(products["units_sold"], errors="coerce") < 0).sum() + pd.to_numeric(products["units_sold"], errors="coerce").isna().sum(), "Observed units_sold must be non-negative")
-    check("product_provenance", "FAIL", products[["product_url", "Time_Collected", "Data_Source"]].isna().any(axis=1).sum(), "Products require URL, date and source")
+    product_rating = pd.to_numeric(products["Review_stars"], errors="coerce")
+    product_sales = pd.to_numeric(products["units_sold"], errors="coerce")
+    check("product_rating_range", "FAIL", (product_rating.notna() & ~product_rating.between(0, 5)).sum(), "Observed Review_stars in [0,5]")
+    check("product_rating_missing", "WARNING", product_rating.isna().sum(), "Missing rating remains null")
+    check("product_units_sold_negative", "FAIL", (product_sales.notna() & (product_sales < 0)).sum(), "Observed units_sold must be non-negative")
+    check("product_units_sold_missing", "WARNING", product_sales.isna().sum(), "Missing sales remains null; never substitute ratings")
+    check("product_provenance", "WARNING", products[["product_url", "Time_Collected", "Data_Source"]].isna().any(axis=1).sum(), "Products should have URL, date and source")
 if not missing_count(reviews, REVIEW_REQUIRED):
     check("unique_review_id", "FAIL", reviews["review_id"].duplicated().sum(), "review_id must be unique")
-    check("review_rating_range", "FAIL", (~pd.to_numeric(reviews["rating"], errors="coerce").between(1, 5)).sum(), "rating in [1,5]")
-    check("review_has_image", "FAIL", (~reviews["has_image"].isin([0, 1])).sum(), "has_image must be binary")
+    review_rating = pd.to_numeric(reviews["rating"], errors="coerce")
+    review_image = pd.to_numeric(reviews["has_image"], errors="coerce")
+    check("review_rating_range", "FAIL", (review_rating.notna() & ~review_rating.between(1, 5)).sum(), "Observed rating in [1,5]")
+    check("review_rating_missing", "WARNING", review_rating.isna().sum(), "Unverified rating remains null")
+    check("review_has_image", "FAIL", (review_image.notna() & ~review_image.isin([0, 1])).sum(), "Observed has_image must be binary")
+    check("review_has_image_missing", "WARNING", review_image.isna().sum(), "Unverified image flag remains null")
     check("review_text", "FAIL", reviews["review_text"].fillna("").astype(str).str.strip().eq("").sum(), "Only text reviews are accepted")
 if not missing_count(seller_metrics, SELLER_REQUIRED):
     check("seller_key_unique", "FAIL", seller_metrics.duplicated(["Shop_ID", "product_id"]).sum(), "Seller export must have one row per shop/product")
@@ -196,7 +222,7 @@ reviews_clean["Suspicious_Username"] = reviews_clean["user_name"].fillna("").ast
 products_clean["Description_Length"] = products_clean["description_clean"].str.len()
 products_clean["Detail_Field_Count"] = products_clean["product_details"].map(lambda x: len(x) if isinstance(x, dict) else 0)
 products_clean["Transparency_Score"] = ((products_clean["Description_Length"].clip(upper=1000) / 1000) * .5 + (products_clean["Detail_Field_Count"].clip(upper=10) / 10) * .5)
-observed_sales = products_clean.groupby("Shop_ID", as_index=False)["units_sold"].sum().rename(columns={"units_sold":"Sales"})
+observed_sales = products_clean.groupby("Shop_ID", as_index=False)["units_sold"].sum(min_count=1).rename(columns={"units_sold":"Sales"})
 shops_clean = shops_clean.drop(columns=["Sales"], errors="ignore").merge(observed_sales, on="Shop_ID", how="left", validate="one_to_one")
 '''),
 code(r'''
@@ -251,11 +277,12 @@ sns.set_theme(style="whitegrid")
 def save(fig, name):
     fig.tight_layout(); fig.savefig(OUTPUT / "figures" / name, dpi=160, bbox_inches="tight"); plt.show(); plt.close(fig)
 def histogram(frame, column, name):
-    if frame.empty: return
-    fig, ax = plt.subplots(); sns.histplot(frame[column].dropna(), bins=min(25,max(5,len(frame))), ax=ax); ax.set_title(column); save(fig,name)
+    values = frame[column].dropna()
+    if values.empty: print(f"SKIP {column}: no observed values"); return
+    fig, ax = plt.subplots(); sns.histplot(values, bins=min(25,max(5,len(values))), ax=ax); ax.set_title(column); save(fig,name)
 
 for frame, column, name in [(shops,"Follower_Count_k","followers.png"),(shops,"Rating_Average","shop_rating.png"),(shops,"Chat_Response_Rate_pct","response_rate.png"),(products,"Review_stars","product_rating.png"),(reviews,"rating","review_rating.png"),(reviews,"Comment_Length","comment_length.png")]: histogram(frame,column,name)
-if not reviews.empty:
+if not reviews["has_image"].dropna().empty:
     fig, ax = plt.subplots(); reviews["has_image"].value_counts().sort_index().plot.pie(autopct="%1.1f%%", ax=ax); ax.set_ylabel(""); ax.set_title("Review image rate"); save(fig,"has_image.png")
 '''),
 code(r'''
@@ -297,7 +324,11 @@ from sklearn.preprocessing import StandardScaler
 
 reviews = pd.read_csv(PROCESSED / "reviews_clean.csv")
 features = CONFIG["clustering"]["features"]
-X = reviews[features].apply(pd.to_numeric, errors="coerce").fillna(0)
+numeric_features = reviews[features].apply(pd.to_numeric, errors="coerce")
+complete = numeric_features.notna().all(axis=1)
+if (~complete).any(): print(f"Excluded {(~complete).sum()} reviews with unverified clustering features; values were not imputed.")
+reviews = reviews.loc[complete].copy()
+X = numeric_features.loc[complete]
 if len(X) < max(3, CONFIG["clustering"]["n_clusters"]): raise ValueError("Insufficient reviews for clustering")
 scaled = StandardScaler().fit_transform(X)
 rows = []

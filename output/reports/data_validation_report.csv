@@ -1,17 +1,31 @@
-check_name,status,error_count,description
-shops_required_columns,PASS,0,Required schema
-products_required_columns,PASS,0,Required schema
-reviews_required_columns,PASS,0,Required schema
-reviews_has_rows,WARNING,0,No real records supplied
-unique_Shop_ID,PASS,0,Shop_ID unique
-unique_product_id,PASS,0,product_id unique
-unique_review_id,PASS,0,review_id unique
-shop_rating_range,PASS,0,"Rating_Average in [0,5]"
-response_rate_range,PASS,0,"Response rate in [0,100]"
-product_rating_range,PASS,0,"Review_stars in [0,5]"
-review_rating_range,PASS,0,"rating in [1,5]"
-review_has_image,PASS,0,has_image binary
-product_shop_fk,PASS,0,Product Shop FK
-review_shop_fk,PASS,0,Review Shop FK
-review_product_fk,PASS,0,Review Product FK
-review_product_shop_match,PASS,0,Review.Shop_ID matches Product.Shop_ID
+check_name,severity,status,error_count,description
+shops_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'Shop_Name', 'Shop_type', 'Years_Active', 'Is_Online_Now', 'Total_Products', 'Follower_Count_k', 'Rating_Average', 'Total_Ratings_k', 'Chat_Response_Rate_pct', 'Has_Voucher', 'Target_Label', 'Time_Collected']"
+products_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'product_name', 'product_details', 'description_text', 'Review_stars', 'units_sold', 'product_url', 'Time_Collected', 'Data_Source']"
+reviews_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'review_id', 'user_name', 'rating', 'review_time', 'review_text', 'has_image', 'Data_Source']"
+seller_metrics_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'Conversion_Rate_pct', 'Time_Collected', 'Data_Source']"
+unique_Shop_ID,FAIL,PASS,0,Shop_ID must be unique
+shop_rating_range,FAIL,PASS,0,"Rating_Average in [0,5]"
+response_rate_range,FAIL,PASS,0,"Chat response in [0,100]"
+shop_dates,FAIL,PASS,0,Time_Collected must be a date
+unique_product_id,FAIL,PASS,0,product_id must be globally unique
+product_rating_range,FAIL,PASS,0,"Observed Review_stars in [0,5]"
+product_rating_missing,WARNING,PASS,0,Missing rating remains null
+product_units_sold_negative,FAIL,PASS,0,Observed units_sold must be non-negative
+product_units_sold_missing,WARNING,WARNING,30,Missing sales remains null; never substitute ratings
+product_provenance,WARNING,PASS,0,"Products should have URL, date and source"
+unique_review_id,FAIL,PASS,0,review_id must be unique
+review_rating_range,FAIL,PASS,0,"Observed rating in [1,5]"
+review_rating_missing,WARNING,WARNING,15,Unverified rating remains null
+review_has_image,FAIL,PASS,0,Observed has_image must be binary
+review_has_image_missing,WARNING,WARNING,15,Unverified image flag remains null
+review_text,FAIL,PASS,0,Only text reviews are accepted
+seller_key_unique,FAIL,PASS,0,Seller export must have one row per shop/product
+conversion_range,FAIL,PASS,0,"Conversion rate in [0,100]"
+product_shop_fk,FAIL,PASS,0,Every product shop exists
+review_shop_fk,FAIL,PASS,0,Every review shop exists
+review_product_fk,FAIL,PASS,0,Every review product exists
+review_product_shop_match,FAIL,PASS,0,Review Shop_ID agrees with its product
+minimum_shops,WARNING,WARNING,12,At least 15 real shops
+products_per_shop,WARNING,PASS,0,Each shop needs 5–10 products
+reviews_per_product,WARNING,WARNING,28,Each product needs at least five text reviews
+seller_metrics_present,WARNING,WARNING,1,Authorized Seller Centre export is required
