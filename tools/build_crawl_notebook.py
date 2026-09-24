@@ -39,17 +39,24 @@ if len(shop_ids)<15: print(f"WARNING: mới có {len(shop_ids)}/15 shop")'''),
 cell("markdown","""## 3. Mở Chromium và đăng nhập
 
 Đăng nhập trực tiếp trong cửa sổ Chromium. Không nhập credential vào notebook."""),
-cell("code",'''from playwright.async_api import async_playwright
+cell("code",'''import os
+from playwright.async_api import async_playwright
 
+has_display=bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+effective_headless=settings.headless or not has_display
+if effective_headless and not settings.headless:
+    print("WARNING: Không tìm thấy XServer/$DISPLAY; tự chuyển sang headless=True.")
+    print("Nếu Shopee yêu cầu đăng nhập/CAPTCHA, hãy chạy notebook trên máy local có giao diện, đăng nhập vào persistent profile rồi chạy lại.")
 runtime=await async_playwright().start()
 context=await runtime.chromium.launch_persistent_context(
     user_data_dir=str(CRAWL_ROOT/".shopee_browser_profile"),
-    headless=settings.headless,
+    headless=effective_headless,
     viewport={"width":1440,"height":1000},
 )
 page=context.pages[0] if context.pages else await context.new_page()
 await page.goto("https://shopee.vn/",wait_until="domcontentloaded",timeout=settings.timeout_ms)
-print("Đăng nhập xong rồi chạy health check.")'''),
+print("Browser started:", {"headless":effective_headless,"has_display":has_display})
+print("Nếu đang chạy headed, đăng nhập xong rồi chạy health check.")'''),
 cell("markdown","## 4. Health check một sản phẩm"),
 cell("code",'''crawler=ShopeeCrawler(page,settings,manifest,PROJECT_ROOT/"Shopee_Dataset",PROJECT_ROOT/"output")
 await crawler.health_check()

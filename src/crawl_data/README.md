@@ -22,7 +22,9 @@ pip install -r requirements.txt
 playwright install chromium
 ```
 
-Notebook chia riêng bước mở trình duyệt và bước crawl. Sau khi cell mở Chromium chạy xong, đăng nhập trực tiếp trong Chromium rồi quay lại notebook chạy cell **Thu thập và ghi Review JSON**.
+Notebook chia riêng bước mở trình duyệt và bước crawl. Sau khi cell mở Chromium chạy xong, đăng nhập trực tiếp trong Chromium rồi quay lại notebook chạy cell thu thập.
+
+Notebook tự kiểm tra `DISPLAY`/`WAYLAND_DISPLAY`. Trên Colab, Docker hoặc server không có XServer, nó tự chuyển sang `headless=True` để tránh `TargetClosedError`. Nếu Shopee yêu cầu đăng nhập hoặc CAPTCHA, headless không thể cho người dùng thao tác; khi đó cần chạy notebook trên máy local có giao diện hoặc dùng XServer/Xvfb do môi trường cung cấp. Tool không tự vượt bước xác minh.
 
 Trình duyệt sẽ mở Shopee. Nếu Shopee yêu cầu đăng nhập, hãy đăng nhập **trực tiếp trong trình duyệt**.
 Không nhập mật khẩu vào script hoặc terminal.
