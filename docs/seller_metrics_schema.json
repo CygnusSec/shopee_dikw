@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Authorized Shopee Seller Centre export",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["Shop_ID", "product_id", "Conversion_Rate_pct", "Time_Collected", "Data_Source"],
+    "properties": {
+      "Shop_ID": {"type": "string", "pattern": "^[^_]+_[^_]+$"},
+      "product_id": {"type": "string", "pattern": "^sp_"},
+      "Conversion_Rate_pct": {"type": "number", "minimum": 0, "maximum": 100},
+      "Units_Sold": {"type": "number", "minimum": 0},
+      "Time_Collected": {"type": "string", "format": "date"},
+      "Data_Source": {"type": "string", "minLength": 1}
+    }
+  }
+}

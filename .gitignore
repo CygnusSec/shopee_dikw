@@ -3,9 +3,14 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 .DS_Store
+.~lock.*#
 output/logs/*.log
 output/models/*.joblib
 output/figures/*.png
 output/.matplotlib/
 *.zip
 .shopee_browser_profile/
+Shopee_Dataset/1_Structured_Data/seller_center_metrics.csv
+Shopee_Dataset/1_Structured_Data/seller_center_metrics.xlsx
+output/submission/
+output/crawl/

@@ -4,22 +4,31 @@ paths:
   shops: Shopee_Dataset/1_Structured_Data/shops_master.xlsx
   products: Shopee_Dataset/2_Semi_Structured_Data
   reviews: Shopee_Dataset/3_Unstructured_Data
+  seller_metrics: Shopee_Dataset/1_Structured_Data/seller_center_metrics.csv
   processed: Shopee_Dataset/4_Processed_Data
   output: output
 clustering:
   n_clusters: 3
+  k_candidates: [2, 3, 4, 5, 6]
   features: [Comment_Length, rating, Sentiment_Score, has_image]
   authenticity_mapping: {}
 classification:
   test_size: 0.2
   n_estimators: 100
   accuracy_target: 0.75
+  minimum_shops_per_class: 5
   labels:
     0: Kem
     1: Binh_thuong
     2: Uy_tin
 regression:
   target: Follower_Count_k
+  features: [Years_Active, Total_Products, Rating_Average, Chat_Response_Rate_pct, Authentic_Review_Rate, Conversion_Rate_pct]
+data_quality:
+  minimum_shops: 15
+  minimum_products_per_shop: 5
+  maximum_products_per_shop: 10
+  minimum_text_reviews_per_product: 5
 reputation:
   authentic_review_weight: 0.50
   chat_response_weight: 0.30
