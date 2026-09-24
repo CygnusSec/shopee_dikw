@@ -40,9 +40,11 @@ cell("markdown","""## 3. Mở Chromium và đăng nhập
 
 Đăng nhập trực tiếp trong cửa sổ Chromium. Không nhập credential vào notebook."""),
 cell("code",'''import os
+import platform
 from playwright.async_api import async_playwright
 
-has_display=bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+host_system=platform.system()
+has_display=host_system in {"Darwin","Windows"} or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 effective_headless=settings.headless or not has_display
 if effective_headless and not settings.headless:
     print("WARNING: Không tìm thấy XServer/$DISPLAY; tự chuyển sang headless=True.")
@@ -55,7 +57,7 @@ context=await runtime.chromium.launch_persistent_context(
 )
 page=context.pages[0] if context.pages else await context.new_page()
 await page.goto("https://shopee.vn/",wait_until="domcontentloaded",timeout=settings.timeout_ms)
-print("Browser started:", {"headless":effective_headless,"has_display":has_display})
+print("Browser started:", {"host_system":host_system,"headless":effective_headless,"has_display":has_display})
 print("Nếu đang chạy headed, đăng nhập xong rồi chạy health check.")'''),
 cell("markdown","## 4. Health check một sản phẩm"),
 cell("code",'''crawler=ShopeeCrawler(page,settings,manifest,PROJECT_ROOT/"Shopee_Dataset",PROJECT_ROOT/"output")

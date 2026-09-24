@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "rv_01_001_0001",
+    "user_name": "p*****i",
+    "rating": null,
+    "review_time": "2025-03-19 21:45",
+    "review_text": "Đúng mô tả màu đẹp đóng gói cẩn thận giao hàng khá nhanh",
+    "has_image": null,
+    "source_url": "https://shopee.vn/product/364616598/26076118065",
+    "collection_date": "2026-09-24"
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "rv_01_001_0002",
+    "user_name": "teoem1605",
+    "rating": null,
+    "review_time": "2026-01-17 17:22",
+    "review_text": "Màu sắc: xanh\nVừa chân ạ",
+    "has_image": null,
+    "source_url": "https://shopee.vn/product/364616598/26076118065",
+    "collection_date": "2026-09-24"
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "rv_01_001_0003",
+    "user_name": "trangks803",
+    "rating": null,
+    "review_time": "2026-03-30 12:38",
+    "review_text": "giày đẹp, gói cẩn thận, hộp đẹp",
+    "has_image": null,
+    "source_url": "https://shopee.vn/product/364616598/26076118065",
+    "collection_date": "2026-09-24"
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "rv_01_001_0004",
+    "user_name": "gfpxrvly3i",
+    "rating": null,
+    "review_time": "2025-03-09 08:25",
+    "review_text": "Giày chính hãng kiểu gì mà gửi dây buộc dày bên ngắn bên dài.",
+    "has_image": null,
+    "source_url": "https://shopee.vn/product/364616598/26076118065",
+    "collection_date": "2026-09-24"
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "rv_01_001_0005",
+    "user_name": "lamdang0606",
+    "rating": null,
+    "review_time": "2026-09-16 08:16",
+    "review_text": "Đúng với mô tả: dung mo ta\nMàu sắc: den\nChất liệu: nhu quang cao\nGiao hàng nhanh, gia thay đổi liên tục dc giảm giá nen gia tốt",
+    "has_image": null,
+    "source_url": "https://shopee.vn/product/364616598/26425712721",
+    "collection_date": "2026-09-24"
+  }
+]

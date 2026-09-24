@@ -4,8 +4,8 @@ max_pages: 20
 timeout_ms: 90000
 retry_attempts: 3
 backoff_seconds: 2.0
-request_delay_min_seconds: 1.2
-request_delay_max_seconds: 2.5
+request_delay_min_seconds: 5.0
+request_delay_max_seconds: 10.0
 headless: false
 resume: true
 dry_run: false

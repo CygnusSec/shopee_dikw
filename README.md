@@ -18,7 +18,7 @@ Windows activation: `.venv\Scripts\activate`.
 
 Open Jupyter and run the notebooks in `src/` sequentially from `00_data_validation.ipynb` through `06_final_analysis.ipynb`.
 
-Dữ liệu Shop/Product/Review được thu thập bằng notebook `src/crawl_data/collect_shopee_data.ipynb`; xem `src/crawl_data/README.md` trước khi chạy.
+Dữ liệu Shop/Product/Review được thu thập local bằng `./run_crawler_local.sh`; xem `src/crawl_data/README.md` trước khi chạy. Các notebook crawl cũ không còn là entrypoint chính.
 
 Add at least 15 genuine shops, 5–10 products per shop, five text reviews per product, and an authorized Seller Centre export at `Shopee_Dataset/1_Structured_Data/seller_center_metrics.csv`. The private raw export is gitignored. After clustering, inspect its profile and samples, then enter a human-confirmed mapping in config. Classification requires the manually reviewed `output/labeling/Data_Labeled.csv`.
 

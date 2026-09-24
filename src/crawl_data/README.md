@@ -1,6 +1,6 @@
 # Thu thập Review thật từ Shopee
 
-Notebook chính là `collect_shopee_data.ipynb`. Nó đọc manifest `product_review_mapping.json`, thu thập Shop/Product/Review, checkpoint sau từng sản phẩm và merge vào dữ liệu cũ. `collect_shopee_reviews.ipynb` chỉ được giữ lại để tham khảo lịch sử.
+Entrypoint chính là script local `run_local.py`, được gọi thuận tiện qua `run_crawler_local.sh`. Script đọc manifest `product_review_mapping.json`, mở Chromium có giao diện, chờ đăng nhập, thu thập Shop/Product/Review, checkpoint sau từng sản phẩm và merge vào dữ liệu cũ. Hai notebook crawl chỉ được giữ lại để tham khảo lịch sử, không còn là cách chạy được khuyến nghị.
 
 ```text
 Shopee_Dataset/3_Unstructured_Data/
@@ -11,25 +11,46 @@ Shopee_Dataset/3_Unstructured_Data/
 
 Trước khi chạy, mở rộng manifest lên ít nhất 15 shop, mỗi shop 5–10 sản phẩm. Mỗi dòng phải có `Shop_ID`, `Shop_Name`, `product_id`, `product_name`, `shopee_shop_id`, `shopee_item_id` và `product_url`. Notebook không chứa danh sách shop hard-code.
 
-## Chạy bằng notebook
+## Cài đặt trên máy local
 
-Mở `src/crawl_data/collect_shopee_data.ipynb` bằng Jupyter và chạy lần lượt từng cell. Tùy chỉnh timeout, retry, delay, headless, dry-run và resume trong `crawl_config.yaml`.
-
-Nếu mở Jupyter ngay trong `src/crawl_data`, có thể cài dependency bằng:
+Từ Terminal tại thư mục dự án:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium
+python -m playwright install chromium
 ```
 
-Notebook chia riêng bước mở trình duyệt và bước crawl. Sau khi cell mở Chromium chạy xong, đăng nhập trực tiếp trong Chromium rồi quay lại notebook chạy cell thu thập.
+## Chạy crawler
 
-Notebook tự kiểm tra `DISPLAY`/`WAYLAND_DISPLAY`. Trên Colab, Docker hoặc server không có XServer, nó tự chuyển sang `headless=True` để tránh `TargetClosedError`. Nếu Shopee yêu cầu đăng nhập hoặc CAPTCHA, headless không thể cho người dùng thao tác; khi đó cần chạy notebook trên máy local có giao diện hoặc dùng XServer/Xvfb do môi trường cung cấp. Tool không tự vượt bước xác minh.
+```bash
+./run_crawler_local.sh
+```
 
-Trình duyệt sẽ mở Shopee. Nếu Shopee yêu cầu đăng nhập, hãy đăng nhập **trực tiếp trong trình duyệt**.
-Không nhập mật khẩu vào script hoặc terminal.
+Chromium sẽ mở trên máy local. Đăng nhập trực tiếp trong cửa sổ đó, quay lại Terminal và nhấn Enter. Script health-check trước rồi mới crawl.
 
-Không nhập mật khẩu vào notebook hoặc terminal.
+Các tùy chọn:
+
+```bash
+./run_crawler_local.sh --dry-run
+./run_crawler_local.sh --restart
+./run_crawler_local.sh --skip-login-wait
+./run_crawler_local.sh --cookie-file /duong/dan/private-curl.txt --skip-login-wait
+```
+
+- `--dry-run`: mở browser và kiểm tra luồng nhưng không ghi record crawl.
+- `--restart`: bỏ qua checkpoint hoàn tất; merge vẫn chống duplicate.
+- `--skip-login-wait`: dùng profile đã đăng nhập mà không chờ Enter.
+- `--cookie-file`: nạp session cookie từ file cURL/JSON/Netscape riêng. Tool chỉ nhập allowlist cookie phiên Shopee, không chép giá trị vào source hoặc log.
+
+Cookie file phải nằm ngoài Git hoặc trong `src/crawl_data/.auth/` đã được gitignore. Giới hạn quyền đọc bằng `chmod 600 <file>`. Không gửi file này cho thành viên khác; đăng xuất/thu hồi phiên sau khi thu thập xong. Cookie có thể hết hạn hoặc bị ràng buộc với thiết bị/IP, và không bảo đảm vượt qua verification.
+
+Script từ chối chạy trên Colab, Docker hoặc SSH server không có desktop. Tool không tự vượt đăng nhập, CAPTCHA hoặc cơ chế bảo vệ của Shopee.
+
+Nếu Chromium chuyển tới `/verify/captcha`, hiển thị “Please Try Again Later” hoặc có `anti_bot_tracking_id`, không tiếp tục bấm/retry liên tục. CLI sẽ nhận diện và dừng trước health check. Đóng phiên, chờ cooldown và kiểm tra Shopee bằng trình duyệt thông thường. Nếu vẫn bị chặn, dùng Seller Centre export/API được cấp quyền hoặc thu thập thủ công; không chỉnh crawler để vượt xác minh.
+
+Nếu Shopee yêu cầu đăng nhập, hãy đăng nhập **trực tiếp trong Chromium**. Không nhập mật khẩu vào script hoặc Terminal.
 
 ## Kết quả mong đợi
 

@@ -8,6 +8,8 @@ sys.path.insert(0, str(ROOT / "src" / "crawl_data"))
 from crawler.normalizers import normalize_review, stable_review_id
 from crawler.storage import atomic_write_json, merge_records, merge_shop_file, read_json_list
 from crawler.validation import validate_collection
+from crawler.config import CrawlSettings
+from crawler.runner import ShopeeCrawler
 
 
 MANIFEST_ROW = {
@@ -52,3 +54,8 @@ def test_collection_validation_detects_duplicate_review():
     result = validate_collection([MANIFEST_ROW], [product], [review, dict(review)], minimum_shops=1, minimum_products=1, maximum_products=10, minimum_reviews=1)
     assert not result["valid"]
     assert any("duplicate review_id" in error for error in result["errors"])
+
+
+def test_runner_wires_settings_into_review_collector(tmp_path):
+    crawler = ShopeeCrawler(object(), CrawlSettings(), [MANIFEST_ROW], tmp_path / "dataset", tmp_path / "output")
+    assert crawler.reviews.settings.reviews_per_product == 5

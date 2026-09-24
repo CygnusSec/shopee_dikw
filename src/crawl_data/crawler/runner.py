@@ -21,7 +21,7 @@ class ShopeeCrawler:
         self.settings, self.manifest = settings, manifest
         self.dataset_root, self.output_root = dataset_root, output_root
         self.client = BrowserClient(page, settings)
-        self.products = ProductCollector(self.client); self.reviews = ReviewCollector(self.client); self.shops = ShopCollector(self.client)
+        self.products = ProductCollector(self.client); self.reviews = ReviewCollector(self.client, settings); self.shops = ShopCollector(self.client)
         self.crawl_root = output_root / "crawl"; self.raw_root = self.crawl_root / "schema_change_samples"
         self.crawl_root.mkdir(parents=True, exist_ok=True)
         self.checkpoints = CheckpointStore(self.crawl_root / "checkpoint.json")

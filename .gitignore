@@ -4,6 +4,9 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .~lock.*#
+src/crawl_data/.auth/
+*.cookies.json
+*.cookies.txt
 output/logs/*.log
 output/models/*.joblib
 output/figures/*.png
