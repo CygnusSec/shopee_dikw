@@ -1,6 +1,6 @@
 # Thu thập Review thật từ Shopee
 
-Entrypoint chính là script local `run_local.py`, được gọi thuận tiện qua `run_crawler_local.sh`. Script đọc manifest `product_review_mapping.json`, mở Chromium có giao diện, chờ đăng nhập, thu thập Shop/Product/Review, checkpoint sau từng sản phẩm và merge vào dữ liệu cũ. Hai notebook crawl chỉ được giữ lại để tham khảo lịch sử, không còn là cách chạy được khuyến nghị.
+Entrypoint tương tác là `collect_shopee_data.ipynb`, tách riêng các bước kiểm tra manifest, mở Chromium, đăng nhập, health check, crawl, validation và đóng trình duyệt. CLI `run_local.py`, gọi qua `run_crawler_local.sh`, thực hiện cùng luồng cho người dùng muốn chạy từ Terminal. `collect_shopee_reviews.ipynb` chỉ là tài liệu lịch sử và không còn là entrypoint.
 
 ```text
 Shopee_Dataset/3_Unstructured_Data/

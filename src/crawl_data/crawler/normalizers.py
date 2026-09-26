@@ -45,6 +45,7 @@ def normalize_review(raw, manifest_row):
     except (TypeError, ValueError): raise SchemaChanged("Review rating is absent or invalid")
     text = (raw.get("comment") or raw.get("comment_text") or "").strip()
     shop_id, product_id = manifest_row["Shop_ID"], manifest_row["product_id"]
+    collected_at = datetime.now(VN_TZ).date().isoformat()
     return {
         "Shop_ID": shop_id,
         "product_id": product_id,
@@ -55,7 +56,10 @@ def normalize_review(raw, manifest_row):
         "review_text": text,
         "has_image": int(bool(images)),
         "source_comment_id": raw.get("cmtid") or raw.get("comment_id"),
+        "source_url": manifest_row["product_url"],
+        "Time_Collected": collected_at,
         "Data_Source": "Shopee public product review endpoint",
+        "Verification_Status": "collected_from_endpoint",
     }
 
 

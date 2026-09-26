@@ -1,0 +1,4 @@
+dataset,raw_rows,clean_rows,dropped_rows
+shops,3,3,0
+products,30,30,0
+reviews,15,15,0

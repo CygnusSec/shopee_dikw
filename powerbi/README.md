@@ -34,3 +34,5 @@ Average Authentic Review Rate = AVERAGE(Shop_Authenticity_Report[Authentic_Revie
 3. **Uy tín và chuyển đổi** — Response Rate–Conversion scatter and authenticity matrix. Color under 50% red, 50–80% amber, and over 80% green.
 
 Selecting a shop must cross-filter product and review visuals. Refresh must complete without absolute-path errors, counts must match `output/powerbi/kpi_summary.csv`, and all interactions must work after reopening the file.
+
+After reopening and verifying the report, copy `verification.example.json` to `verification.json`, record the exact three page names, set both checks to `true`, add reviewer/date, and copy the current `input_fingerprint` from `output/reports/submission_check.json`. This evidence is required by the submission checker; the example file itself never counts as approval, and a fingerprint from an older dataset is rejected.

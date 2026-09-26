@@ -1,7 +1,7 @@
 check_name,severity,status,error_count,description
 shops_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'Shop_Name', 'Shop_type', 'Years_Active', 'Is_Online_Now', 'Total_Products', 'Follower_Count_k', 'Rating_Average', 'Total_Ratings_k', 'Chat_Response_Rate_pct', 'Has_Voucher', 'Target_Label', 'Time_Collected']"
 products_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'product_name', 'product_details', 'description_text', 'Review_stars', 'units_sold', 'product_url', 'Time_Collected', 'Data_Source']"
-reviews_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'review_id', 'user_name', 'rating', 'review_time', 'review_text', 'has_image', 'Data_Source']"
+reviews_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'review_id', 'user_name', 'rating', 'review_time', 'review_text', 'has_image', 'source_url', 'Time_Collected', 'Data_Source', 'Verification_Status']"
 seller_metrics_required_columns,FAIL,PASS,0,"Required schema: ['Shop_ID', 'product_id', 'Conversion_Rate_pct', 'Time_Collected', 'Data_Source']"
 unique_Shop_ID,FAIL,PASS,0,Shop_ID must be unique
 shop_rating_range,FAIL,PASS,0,"Rating_Average in [0,5]"
@@ -19,6 +19,7 @@ review_rating_missing,WARNING,WARNING,15,Unverified rating remains null
 review_has_image,FAIL,PASS,0,Observed has_image must be binary
 review_has_image_missing,WARNING,WARNING,15,Unverified image flag remains null
 review_text,FAIL,PASS,0,Only text reviews are accepted
+review_provenance,WARNING,PASS,0,"Reviews should have URL, collection date, source and verification status"
 seller_key_unique,FAIL,PASS,0,Seller export must have one row per shop/product
 conversion_range,FAIL,PASS,0,"Conversion rate in [0,100]"
 product_shop_fk,FAIL,PASS,0,Every product shop exists

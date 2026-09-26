@@ -24,6 +24,7 @@ def code(text: str) -> dict:
 
 SETUP = r'''
 from pathlib import Path
+import hashlib
 import json
 import warnings
 import numpy as np
@@ -45,14 +46,25 @@ OUTPUT = project_path("output")
 PROCESSED = project_path("processed")
 for folder in [OUTPUT / "reports", OUTPUT / "figures", OUTPUT / "models", OUTPUT / "labeling", OUTPUT / "logs", OUTPUT / "powerbi", PROCESSED]:
     folder.mkdir(parents=True, exist_ok=True)
+fingerprint_paths = [PROJECT_ROOT / "config" / "config.yaml", project_path("shops")]
+for key in ("products", "reviews"):
+    fingerprint_paths.extend(sorted(project_path(key).glob("shop_*.json")))
+seller_candidate = project_path("seller_metrics")
+for candidate in (seller_candidate, seller_candidate.with_suffix(".xlsx")):
+    if candidate.exists(): fingerprint_paths.append(candidate)
+digest = hashlib.sha256()
+for path in fingerprint_paths:
+    digest.update(str(path.relative_to(PROJECT_ROOT)).encode("utf-8")); digest.update(path.read_bytes())
+INPUT_FINGERPRINT = digest.hexdigest()
 print("PROJECT_ROOT:", PROJECT_ROOT)
+print("INPUT_FINGERPRINT:", INPUT_FINGERPRINT)
 '''
 
 
 LOADERS = r'''
 SHOP_REQUIRED = ["Shop_ID", "Shop_Name", "Shop_type", "Years_Active", "Is_Online_Now", "Total_Products", "Follower_Count_k", "Rating_Average", "Total_Ratings_k", "Chat_Response_Rate_pct", "Has_Voucher", "Target_Label", "Time_Collected"]
 PRODUCT_REQUIRED = ["Shop_ID", "product_id", "product_name", "product_details", "description_text", "Review_stars", "units_sold", "product_url", "Time_Collected", "Data_Source"]
-REVIEW_REQUIRED = ["Shop_ID", "product_id", "review_id", "user_name", "rating", "review_time", "review_text", "has_image", "Data_Source"]
+REVIEW_REQUIRED = ["Shop_ID", "product_id", "review_id", "user_name", "rating", "review_time", "review_text", "has_image", "source_url", "Time_Collected", "Data_Source", "Verification_Status"]
 SELLER_REQUIRED = ["Shop_ID", "product_id", "Conversion_Rate_pct", "Time_Collected", "Data_Source"]
 
 def load_json_folder(folder, pattern, columns):
@@ -86,15 +98,19 @@ if manifest_path.exists():
         url_map = manifest.drop_duplicates("product_id").set_index("product_id")["product_url"]
         if "product_url" not in products: products["product_url"] = products["product_id"].map(url_map)
         else: products["product_url"] = products["product_url"].fillna(products["product_id"].map(url_map))
-shop_dates = shops.set_index("Shop_ID")["Time_Collected"].to_dict() if {"Shop_ID", "Time_Collected"} <= set(shops) else {}
 for column in PRODUCT_REQUIRED:
     if column not in products: products[column] = np.nan
-products["Time_Collected"] = products["Time_Collected"].fillna(products["Shop_ID"].map(shop_dates))
-products["Data_Source"] = products["Data_Source"].fillna("Shopee public listing (legacy/manual collection)")
+if "product_details" in products:
+    detail_url = products["product_details"].map(lambda value: value.get("source_product_url") if isinstance(value, dict) else None)
+    detail_date = products["product_details"].map(lambda value: value.get("collection_date") if isinstance(value, dict) else None)
+    products["product_url"] = products["product_url"].fillna(detail_url)
+    products["Time_Collected"] = products["Time_Collected"].fillna(detail_date)
+products["Data_Source"] = products["Data_Source"].fillna(products["product_url"])
 for column in REVIEW_REQUIRED:
     if column not in reviews: reviews[column] = np.nan
-if "collection_date" in reviews: reviews["review_time"] = reviews["review_time"].fillna(reviews["collection_date"])
+if "collection_date" in reviews: reviews["Time_Collected"] = reviews["Time_Collected"].fillna(reviews["collection_date"])
 if "source_url" in reviews: reviews["Data_Source"] = reviews["Data_Source"].fillna(reviews["source_url"])
+reviews["Verification_Status"] = reviews["Verification_Status"].fillna("legacy_partial_metadata")
 print({"shops": len(shops), "products": len(products), "reviews": len(reviews), "seller_metrics": len(seller_metrics)})
 '''
 
@@ -140,6 +156,7 @@ if not missing_count(reviews, REVIEW_REQUIRED):
     check("review_has_image", "FAIL", (review_image.notna() & ~review_image.isin([0, 1])).sum(), "Observed has_image must be binary")
     check("review_has_image_missing", "WARNING", review_image.isna().sum(), "Unverified image flag remains null")
     check("review_text", "FAIL", reviews["review_text"].fillna("").astype(str).str.strip().eq("").sum(), "Only text reviews are accepted")
+    check("review_provenance", "WARNING", reviews[["source_url", "Time_Collected", "Data_Source", "Verification_Status"]].isna().any(axis=1).sum(), "Reviews should have URL, collection date, source and verification status")
 if not missing_count(seller_metrics, SELLER_REQUIRED):
     check("seller_key_unique", "FAIL", seller_metrics.duplicated(["Shop_ID", "product_id"]).sum(), "Seller export must have one row per shop/product")
     check("conversion_range", "FAIL", (~pd.to_numeric(seller_metrics["Conversion_Rate_pct"], errors="coerce").between(0,100)).sum(), "Conversion rate in [0,100]")
@@ -171,23 +188,48 @@ if not critical.empty:
     raise ValueError("Critical validation failed: " + ", ".join(critical["check_name"]))
 '''),
 code(r'''
+import re
 def exists(rel): return (PROJECT_ROOT / rel).exists()
+metrics_path = OUTPUT / "reports" / "classification_metrics.json"
+metrics = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else {}
+regression_metrics_path = OUTPUT / "reports" / "regression_metrics.json"
+regression_metrics = json.loads(regression_metrics_path.read_text(encoding="utf-8")) if regression_metrics_path.exists() else {}
+wisdom_path = OUTPUT / "reports" / "wisdom_facts.json"
+wisdom = json.loads(wisdom_path.read_text(encoding="utf-8")) if wisdom_path.exists() else {}
+mapping = CONFIG["clustering"].get("authenticity_mapping") or {}
+pbix = next((path for path in (PROJECT_ROOT / "powerbi").glob("*.pbix")), None)
+pbix_evidence_path = PROJECT_ROOT / "powerbi" / "verification.json"
+pbix_evidence = json.loads(pbix_evidence_path.read_text(encoding="utf-8")) if pbix_evidence_path.exists() else {}
+required_pages = {"Tổng quan shop", "Sản phẩm và review", "Uy tín và chuyển đổi"}
+powerbi_verified = bool(pbix and required_pages <= set(pbix_evidence.get("pages", [])) and pbix_evidence.get("refresh_passed") is True and pbix_evidence.get("cross_filter_passed") is True and str(pbix_evidence.get("verified_by", "")).strip() and str(pbix_evidence.get("verified_at", "")).strip() and pbix_evidence.get("input_fingerprint") == INPUT_FINGERPRINT)
+metadata_path = PROJECT_ROOT / "submission" / "submission_metadata.yaml"
+metadata = yaml.safe_load(metadata_path.read_text(encoding="utf-8")) if metadata_path.exists() else {}
+links_verified = bool(str(metadata.get("colab_url", "")).startswith("https://colab.research.google.com") and str(metadata.get("drive_url", "")).startswith("https://drive.google.com") and metadata.get("access_verified") is True and str(metadata.get("verified_by", "")).strip() and str(metadata.get("verified_at", "")).strip() and metadata.get("input_fingerprint") == INPUT_FINGERPRINT)
+report_path = PROJECT_ROOT / "report" / "Final_Report.pdf"
+report_pages = len(re.findall(rb"/Type\s*/Page(?!s)\b", report_path.read_bytes())) if report_path.exists() else 0
+coverage_ready = bool(len(shops) >= dq["minimum_shops"] and product_counts.between(dq["minimum_products_per_shop"], dq["maximum_products_per_shop"]).all() and (review_counts >= dq["minimum_text_reviews_per_product"]).all())
 items = {
     "THREE_DATA_TYPES": bool(len(shops) and len(products) and len(reviews)),
-    "MINIMUM_SHOPS": shops["Shop_ID"].nunique() >= CONFIG["data_quality"]["minimum_shops"],
+    "DATA_COVERAGE": coverage_ready,
+    "REVIEW_METADATA_COMPLETE": bool(reviews["rating"].notna().all() and reviews["has_image"].notna().all()),
+    "PROVENANCE_COMPLETE": bool(products[["product_url","Time_Collected","Data_Source"]].notna().all(axis=1).all() and reviews[["source_url","Time_Collected","Data_Source","Verification_Status"]].notna().all(axis=1).all()),
     "SELLER_METRICS": not seller_metrics.empty,
-    "POWER_BI": any((PROJECT_ROOT / "powerbi").glob("*.pbix")),
-    "CLUSTERING_NOTEBOOK": exists("src/03_clustering_reviews.ipynb"),
-    "CLASSIFICATION_NOTEBOOK": exists("src/04_shop_classification.ipynb"),
-    "REGRESSION_NOTEBOOK": exists("src/05_regression.ipynb"),
+    "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) <= {0.0,0.5,1.0},
     "AUTHENTICITY_REPORT": exists("output/reports/Shop_Authenticity_Report.csv"),
-    "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv"),
-    "REGRESSION_RESULT": exists("output/reports/Regression_Result.csv"),
-    "FINAL_REPORT": any((PROJECT_ROOT / "report").glob("Final_Report.*")),
+    "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
+    "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and float(metrics.get("accuracy",0)) > float(CONFIG["classification"]["accuracy_target"]),
+    "CLASSIFICATION_MACRO_F1": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and pd.notna(metrics.get("macro_f1")),
+    "REGRESSION_RESULT": exists("output/reports/Regression_Result.csv") and regression_metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
+    "WISDOM_FACTS": wisdom.get("input_fingerprint") == INPUT_FINGERPRINT,
+    "POWER_BI_VERIFIED": powerbi_verified,
+    "FINAL_REPORT_10_PAGES": report_pages >= 10,
+    "COLAB_DRIVE_ACCESS": links_verified,
 }
-text = "\n".join(f"{name:<30} {'PASS' if value else 'FAIL'}" for name, value in items.items())
-text += f"\n\nOVERALL: {'READY' if all(items.values()) else 'NOT READY FOR SUBMISSION'}\n"
+items = {name:bool(value) for name,value in items.items()}
+text = "\n".join(f"{name:<32} {'PASS' if value else 'FAIL'}" for name, value in items.items())
+text += f"\n\nCOUNTS: shops={shops['Shop_ID'].nunique()}, products={products['product_id'].nunique()}, reviews={len(reviews)}\nFINAL_REPORT_PAGES: {report_pages}\n\nOVERALL: {'READY FOR SUBMISSION' if all(items.values()) else 'NOT READY FOR SUBMISSION'}\n"
 (OUTPUT / "reports" / "submission_check.txt").write_text(text, encoding="utf-8")
+(OUTPUT / "reports" / "submission_check.json").write_text(json.dumps({"checks":items,"overall_ready":all(items.values())},ensure_ascii=False,indent=2),encoding="utf-8")
 print(text)
 ''')],
 
@@ -205,6 +247,10 @@ def clean_text(value):
     text = re.sub(r"\s+", " ", text).strip()
     return re.sub(r"\s+([!?.,])", r"\1", text)
 
+STOPWORDS = {"và","là","của","có","cho","một","những","các","được","với","thì","mà","ở","đã","này","đó","rất"}
+def remove_stopwords(value):
+    return " ".join(token for token in str(value).split() if token not in STOPWORDS)
+
 shops_clean, products_clean, reviews_clean = shops.copy(), products.copy(), reviews.copy()
 numeric_shop = ["Years_Active", "Is_Online_Now", "Total_Products", "Follower_Count_k", "Rating_Average", "Total_Ratings_k", "Chat_Response_Rate_pct", "Has_Voucher"]
 for col in numeric_shop: shops_clean[col] = pd.to_numeric(shops_clean[col], errors="coerce")
@@ -214,8 +260,10 @@ reviews_clean["has_image"] = pd.to_numeric(reviews_clean["has_image"], errors="c
 shops_clean["Time_Collected"] = pd.to_datetime(shops_clean["Time_Collected"], errors="coerce").dt.date.astype("string")
 products_clean["Time_Collected"] = pd.to_datetime(products_clean["Time_Collected"], errors="coerce").dt.date.astype("string")
 reviews_clean["review_time"] = pd.to_datetime(reviews_clean["review_time"], errors="coerce").dt.date.astype("string")
-products_clean["description_clean"] = products_clean["description_text"].map(clean_text)
-reviews_clean["review_clean"] = reviews_clean["review_text"].map(clean_text)
+products_clean["description_normalized"] = products_clean["description_text"].map(clean_text)
+reviews_clean["review_normalized"] = reviews_clean["review_text"].map(clean_text)
+products_clean["description_clean"] = products_clean["description_normalized"].map(remove_stopwords)
+reviews_clean["review_clean"] = reviews_clean["review_normalized"].map(remove_stopwords)
 reviews_clean["Comment_Length"] = reviews_clean["review_text"].fillna("").astype(str).str.len()
 reviews_clean["Word_Count"] = reviews_clean["review_clean"].str.split().str.len()
 reviews_clean["Suspicious_Username"] = reviews_clean["user_name"].fillna("").astype(str).str.match(r"^(user\d{5,}|[a-z]\*{3,}[a-z])$", case=False).astype(int)
@@ -299,7 +347,8 @@ for label in ["positive","negative"]:
         cloud = WordCloud(width=1200,height=600,background_color="white",collocations=False).generate(text)
         fig, ax = plt.subplots(figsize=(12,6)); ax.imshow(cloud); ax.axis("off"); ax.set_title(f"{label.title()} review keywords"); save(fig,f"wordcloud_{label}.png")
 
-summary = pd.DataFrame({"Metric":["Total Shops","Total Products","Total Reviews","Average Review Rating","Image Rate","Observed Units Sold"],"Value":[len(shops),len(products),len(reviews),reviews["rating"].mean(),reviews["has_image"].mean(),products.get("units_sold",pd.Series(dtype=float)).sum()]})
+observed_units = products["units_sold"].sum(min_count=1) if "units_sold" in products else np.nan
+summary = pd.DataFrame({"Metric":["Total Shops","Total Products","Total Reviews","Average Review Rating","Image Rate","Observed Units Sold"],"Value":[len(shops),len(products),len(reviews),reviews["rating"].mean(),reviews["has_image"].mean(),observed_units]})
 shop_eda = shops.copy()
 shop_eda["Product_Count"] = shop_eda["Shop_ID"].map(products.groupby("Shop_ID").size()).fillna(0)
 shop_eda["Review_Count"] = shop_eda["Shop_ID"].map(reviews.groupby("Shop_ID").size()).fillna(0)
@@ -426,7 +475,7 @@ model = RandomForestClassifier(n_estimators=CONFIG["classification"]["n_estimato
 dummy = DummyClassifier(strategy="most_frequent").fit(train[features],train["Target_Label"])
 prediction = model.predict(test[features]); probability = model.predict_proba(test[features]).max(axis=1)
 macro = precision_recall_fscore_support(test["Target_Label"],prediction,average="macro",zero_division=0)
-metrics = {"accuracy":accuracy_score(test["Target_Label"],prediction),"baseline_accuracy":accuracy_score(test["Target_Label"],dummy.predict(test[features])),"macro_precision":macro[0],"macro_recall":macro[1],"macro_f1":macro[2],"weighted_f1":precision_recall_fscore_support(test["Target_Label"],prediction,average="weighted",zero_division=0)[2],"target_accuracy":CONFIG["classification"]["accuracy_target"]}
+metrics = {"input_fingerprint":INPUT_FINGERPRINT,"accuracy":accuracy_score(test["Target_Label"],prediction),"baseline_accuracy":accuracy_score(test["Target_Label"],dummy.predict(test[features])),"macro_precision":macro[0],"macro_recall":macro[1],"macro_f1":macro[2],"weighted_f1":precision_recall_fscore_support(test["Target_Label"],prediction,average="weighted",zero_division=0)[2],"target_accuracy":CONFIG["classification"]["accuracy_target"]}
 metrics["pass_accuracy_requirement"] = metrics["accuracy"] > metrics["target_accuracy"]
 cm = confusion_matrix(test["Target_Label"],prediction,labels=[0,1,2])
 fig,ax=plt.subplots(); sns.heatmap(cm,annot=True,fmt="d",xticklabels=[0,1,2],yticklabels=[0,1,2],ax=ax); ax.set(xlabel="Predicted",ylabel="Actual",title="Confusion matrix"); fig.tight_layout(); fig.savefig(OUTPUT/"figures"/"confusion_matrix.png",dpi=160); plt.show(); plt.close(fig)
@@ -460,7 +509,7 @@ x_train,x_test,y_train,y_test=train_test_split(data[features],data[target],test_
 model=LinearRegression().fit(x_train,y_train); prediction=model.predict(x_test)
 x_scaler,y_scaler=StandardScaler(),StandardScaler(); standardized=LinearRegression().fit(x_scaler.fit_transform(data[features]),y_scaler.fit_transform(data[[target]]).ravel())
 coefficients=pd.DataFrame({"Feature":features,"Coefficient":model.coef_,"Standardized_Coefficient":standardized.coef_}); coefficients["Direction"]=np.where(coefficients["Coefficient"]>=0,"positive","negative"); coefficients["Absolute_Standardized_Coefficient"]=coefficients["Standardized_Coefficient"].abs()
-metrics={"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
+metrics={"input_fingerprint":INPUT_FINGERPRINT,"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
 '''),
 code(r'''
 residuals=y_test-prediction
@@ -493,6 +542,7 @@ weakest_class=int(class_recall.idxmin())
 def finite_or_none(value):
     return float(value) if value is not None and np.isfinite(value) else None
 facts={
+ "input_fingerprint":INPUT_FINGERPRINT,
  "suspicious_review_pct":float((reviews["Is_Authentic"]==0).mean()*100),
  "lowest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[0]["Shop_ID"],
  "highest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[-1]["Shop_ID"],

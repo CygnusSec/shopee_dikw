@@ -9,9 +9,9 @@
       "product_id": {"type": "string", "pattern": "^sp_"},
       "product_name": {"type": "string"},
       "product_details": {"type": "object"},
-      "description_text": {"type": "string"},
-      "Review_stars": {"type": "number", "minimum": 0, "maximum": 5},
-      "units_sold": {"type": "number", "minimum": 0},
+      "description_text": {"type": ["string", "null"]},
+      "Review_stars": {"type": ["number", "null"], "minimum": 0, "maximum": 5},
+      "units_sold": {"type": ["number", "null"], "minimum": 0},
       "product_url": {"type": "string", "format": "uri"},
       "Time_Collected": {"type": "string", "format": "date"},
       "Data_Source": {"type": "string", "minLength": 1}

@@ -9,11 +9,14 @@
       "product_id": {"type": "string", "pattern": "^sp_"},
       "review_id": {"type": "string", "pattern": "^rv_"},
       "user_name": {"type": "string"},
-      "rating": {"type": "number", "minimum": 1, "maximum": 5},
-      "review_time": {"type": "string", "format": "date"},
+      "rating": {"type": ["number", "null"], "minimum": 1, "maximum": 5},
+      "review_time": {"type": ["string", "null"], "format": "date"},
       "review_text": {"type": ["string", "null"]},
-      "has_image": {"type": "integer", "enum": [0, 1]},
-      "Data_Source": {"type": "string", "minLength": 1}
+      "has_image": {"type": ["integer", "null"], "enum": [0, 1, null]},
+      "source_url": {"type": "string", "format": "uri"},
+      "Time_Collected": {"type": "string", "format": "date"},
+      "Data_Source": {"type": "string", "minLength": 1},
+      "Verification_Status": {"type": "string", "minLength": 1}
     }
   }
 }

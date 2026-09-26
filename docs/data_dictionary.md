@@ -8,11 +8,11 @@ Primary key: `Shop_ID`. Required fields: `Shop_Name`, `Shop_type`, `Years_Active
 
 ## Product (semi-structured JSON)
 
-Primary key: `product_id`; foreign key: `Shop_ID`. Required fields include `product_name`, object-valued `product_details`, `description_text`, `Review_stars`, `units_sold`, `product_url`, `Time_Collected`, and `Data_Source`.
+Primary key: `product_id`; foreign key: `Shop_ID`. Required keys include `product_name`, object-valued `product_details`, `description_text`, `Review_stars`, `units_sold`, `product_url`, `Time_Collected`, and `Data_Source`. Values that could not be observed remain JSON `null`; a required key is not permission to invent its value.
 
 ## Review (unstructured JSON)
 
-Primary key: `review_id`; foreign keys: `Shop_ID`, `product_id`. Required fields include `user_name`, `rating`, `review_time`, `review_text`, binary `has_image`, and `Data_Source`.
+Primary key: `review_id`; foreign keys: `Shop_ID`, `product_id`. Required keys include `user_name`, `rating`, `review_time`, `review_text`, binary `has_image`, source URL, collection date, `Data_Source`, and `Verification_Status`. Unverified `rating`, `review_time`, and `has_image` remain JSON `null` and block submission readiness.
 
 ## Seller Centre metrics
 
