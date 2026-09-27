@@ -73,7 +73,9 @@ def evaluate(root: Path = ROOT) -> dict:
     shop_ids = set(shops.get("Shop_ID", pd.Series(dtype=str)).dropna())
     product_ids = set(product_frame.get("product_id", pd.Series(dtype=str)).dropna())
     product_counts = product_frame.groupby("Shop_ID").size() if not product_frame.empty and "Shop_ID" in product_frame else pd.Series(dtype=int)
-    review_counts = review_frame.groupby("product_id").size() if not review_frame.empty and "product_id" in review_frame else pd.Series(dtype=int)
+    text_mask = review_frame.get("review_text", pd.Series(index=review_frame.index, dtype=object)).fillna("").astype(str).str.strip().ne("")
+    text_reviews = review_frame.loc[text_mask]
+    review_counts = text_reviews.groupby("product_id").size() if not text_reviews.empty and "product_id" in text_reviews else pd.Series(dtype=int)
     review_product_ids = set(review_frame.get("product_id", pd.Series(dtype=str)).dropna())
 
     def complete_column(frame: pd.DataFrame, name: str) -> bool:
@@ -148,7 +150,7 @@ def evaluate(root: Path = ROOT) -> dict:
     checks = {
         "THREE_DATA_TYPES": bool(len(shops) and products and reviews),
         "MINIMUM_REAL_SHOPS": len(shop_ids) >= dq["minimum_shops"],
-        "PRODUCTS_PER_SHOP": len(shop_ids) >= dq["minimum_shops"] and all(
+        "PRODUCTS_PER_SHOP": bool(shop_ids) and all(
             dq["minimum_products_per_shop"] <= int(product_counts.get(shop_id, 0)) <= dq["maximum_products_per_shop"]
             for shop_id in shop_ids
         ),
@@ -180,6 +182,7 @@ def evaluate(root: Path = ROOT) -> dict:
             "shops": len(shop_ids),
             "products": len(product_ids),
             "reviews": len(reviews),
+            "text_reviews": len(text_reviews),
             "report_pages": report_pages,
             "powerbi_file": powerbi_path.name if powerbi_path else None,
             "input_fingerprint": input_fingerprint,
@@ -192,7 +195,7 @@ def render(result: dict) -> str:
     evidence = result["evidence"]
     lines.extend([
         "",
-        f"COUNTS: shops={evidence['shops']}, products={evidence['products']}, reviews={evidence['reviews']}",
+        f"COUNTS: shops={evidence['shops']}, products={evidence['products']}, reviews={evidence['reviews']}, text_reviews={evidence['text_reviews']}",
         f"FINAL_REPORT_PAGES: {evidence['report_pages']}",
         "",
         f"OVERALL: {'READY FOR SUBMISSION' if result['overall_ready'] else 'NOT READY FOR SUBMISSION'}",

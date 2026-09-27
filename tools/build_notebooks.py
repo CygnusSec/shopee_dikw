@@ -155,7 +155,7 @@ if not missing_count(reviews, REVIEW_REQUIRED):
     check("review_rating_missing", "WARNING", review_rating.isna().sum(), "Unverified rating remains null")
     check("review_has_image", "FAIL", (review_image.notna() & ~review_image.isin([0, 1])).sum(), "Observed has_image must be binary")
     check("review_has_image_missing", "WARNING", review_image.isna().sum(), "Unverified image flag remains null")
-    check("review_text", "FAIL", reviews["review_text"].fillna("").astype(str).str.strip().eq("").sum(), "Only text reviews are accepted")
+    check("review_text", "WARNING", reviews["review_text"].fillna("").astype(str).str.strip().eq("").sum(), "Rating-only reviews remain raw but are excluded from text analysis")
     check("review_provenance", "WARNING", reviews[["source_url", "Time_Collected", "Data_Source", "Verification_Status"]].isna().any(axis=1).sum(), "Reviews should have URL, collection date, source and verification status")
 if not missing_count(seller_metrics, SELLER_REQUIRED):
     check("seller_key_unique", "FAIL", seller_metrics.duplicated(["Shop_ID", "product_id"]).sum(), "Seller export must have one row per shop/product")
@@ -171,13 +171,14 @@ if {"Shop_ID"} <= set(shops) and {"Shop_ID", "product_id"} <= set(products) and 
 dq = CONFIG["data_quality"]
 check("minimum_shops", "WARNING", max(0, dq["minimum_shops"] - shops["Shop_ID"].nunique()), f"At least {dq['minimum_shops']} real shops")
 product_counts = products.groupby("Shop_ID").size().reindex(shops["Shop_ID"], fill_value=0)
-review_counts = reviews.groupby(["Shop_ID", "product_id"]).size().reindex(pd.MultiIndex.from_frame(products[["Shop_ID", "product_id"]]), fill_value=0)
+reviews_with_text = reviews.loc[reviews["review_text"].fillna("").astype(str).str.strip().ne("")]
+review_counts = reviews_with_text.groupby(["Shop_ID", "product_id"]).size().reindex(pd.MultiIndex.from_frame(products[["Shop_ID", "product_id"]]), fill_value=0)
 check("products_per_shop", "WARNING", ((product_counts < dq["minimum_products_per_shop"]) | (product_counts > dq["maximum_products_per_shop"])).sum(), "Each shop needs 5–10 products")
 check("reviews_per_product", "WARNING", (review_counts < dq["minimum_text_reviews_per_product"]).sum(), "Each product needs at least five text reviews")
 check("seller_metrics_present", "WARNING", int(seller_metrics.empty), "Authorized Seller Centre export is required")
 
 coverage = pd.DataFrame({"Shop_ID": shops["Shop_ID"], "Product_Count": shops["Shop_ID"].map(product_counts).fillna(0).astype(int)})
-coverage["Review_Count"] = coverage["Shop_ID"].map(reviews.groupby("Shop_ID").size()).fillna(0).astype(int)
+coverage["Review_Count"] = coverage["Shop_ID"].map(reviews_with_text.groupby("Shop_ID").size()).fillna(0).astype(int)
 coverage["Products_With_Conversion"] = coverage["Shop_ID"].map(seller_metrics.groupby("Shop_ID").size() if not seller_metrics.empty else {}).fillna(0).astype(int)
 report = pd.DataFrame(checks)
 report.to_csv(OUTPUT / "reports" / "data_validation_report.csv", index=False)
@@ -252,6 +253,7 @@ def remove_stopwords(value):
     return " ".join(token for token in str(value).split() if token not in STOPWORDS)
 
 shops_clean, products_clean, reviews_clean = shops.copy(), products.copy(), reviews.copy()
+reviews_clean = reviews_clean.loc[reviews_clean["review_text"].fillna("").astype(str).str.strip().ne("")].copy()
 numeric_shop = ["Years_Active", "Is_Online_Now", "Total_Products", "Follower_Count_k", "Rating_Average", "Total_Ratings_k", "Chat_Response_Rate_pct", "Has_Voucher"]
 for col in numeric_shop: shops_clean[col] = pd.to_numeric(shops_clean[col], errors="coerce")
 for col in ["Review_stars", "units_sold"]: products_clean[col] = pd.to_numeric(products_clean[col], errors="coerce")
@@ -462,11 +464,20 @@ data = pd.read_csv(source)
 features = ["Years_Active","Total_Products","Follower_Count_k","Rating_Average","Chat_Response_Rate_pct","Authentic_Review_Rate","Conversion_Rate_pct"]
 required_review = ["Labeler","Label_Reason","Review_Status"]
 if not set(required_review) <= set(data): raise ValueError("Labeled data must preserve Labeler, Label_Reason and Review_Status")
-approved = data["Review_Status"].fillna("").astype(str).str.lower().eq("approved")
-documented = data[["Labeler","Label_Reason"]].fillna("").astype(str).apply(lambda s:s.str.strip().ne("")).all(axis=1)
-if not (approved & documented).all(): raise ValueError("Every label must be approved and document its labeler and reason")
-data = data.dropna(subset=["Target_Label",*features]).copy(); data["Target_Label"] = data["Target_Label"].astype(int)
+numeric_labels = pd.to_numeric(data["Target_Label"], errors="coerce")
+data = data.loc[numeric_labels.notna()].copy()
+if data.empty: raise ValueError("Data_Labeled.csv has no labeled rows; assign Target_Label before training")
+data["Target_Label"] = numeric_labels.loc[data.index].astype(int)
 if not set(data["Target_Label"]) <= {0,1,2}: raise ValueError("Target_Label must be 0, 1 or 2")
+approved = data["Review_Status"].fillna("").astype(str).str.strip().str.lower().eq("approved")
+documented = data[["Labeler","Label_Reason"]].fillna("").astype(str).apply(lambda s:s.str.strip().ne("")).all(axis=1)
+if not (approved & documented).all():
+    invalid = data.loc[~(approved & documented), ["Shop_ID","Target_Label","Labeler","Label_Reason","Review_Status"]]
+    raise ValueError("Every used label must be approved and document its labeler and reason. Invalid rows:\n" + invalid.to_string(index=False))
+missing_features = data[features].isna().any(axis=1)
+if missing_features.any():
+    invalid = data.loc[missing_features, ["Shop_ID",*features]]
+    raise ValueError("Labeled rows have missing model features:\n" + invalid.to_string(index=False))
 counts = data["Target_Label"].value_counts().reindex([0,1,2],fill_value=0)
 if (counts < CONFIG["classification"]["minimum_shops_per_class"]).any(): raise ValueError(f"Need at least five shops per class; found {counts.to_dict()}")
 test_n = max(3,int(np.ceil(len(data)*CONFIG["classification"]["test_size"])))
