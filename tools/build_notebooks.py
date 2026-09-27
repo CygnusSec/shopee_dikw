@@ -209,14 +209,21 @@ links_verified = bool(str(metadata.get("colab_url", "")).startswith("https://col
 report_path = PROJECT_ROOT / "report" / "Final_Report.pdf"
 report_pages = len(re.findall(rb"/Type\s*/Page(?!s)\b", report_path.read_bytes())) if report_path.exists() else 0
 coverage_ready = bool(len(shops) >= dq["minimum_shops"] and product_counts.between(dq["minimum_products_per_shop"], dq["maximum_products_per_shop"]).all() and (review_counts >= dq["minimum_text_reviews_per_product"]).all())
+products_per_shop_ready = bool(len(product_counts) and product_counts.between(dq["minimum_products_per_shop"], dq["maximum_products_per_shop"]).all())
+reviews_per_product_ready = bool(len(review_counts) and (review_counts >= dq["minimum_text_reviews_per_product"]).all())
+auth_metadata_path = OUTPUT / "reports" / "authenticity_metadata.json"
+auth_metadata = json.loads(auth_metadata_path.read_text(encoding="utf-8")) if auth_metadata_path.exists() else {}
+authenticity_ready = bool(mapping and exists("output/reports/Shop_Authenticity_Report.csv") and auth_metadata.get("input_fingerprint") == INPUT_FINGERPRINT and auth_metadata.get("authenticity_mapping") == {str(k):float(v) for k,v in mapping.items()})
 items = {
     "THREE_DATA_TYPES": bool(len(shops) and len(products) and len(reviews)),
-    "DATA_COVERAGE": coverage_ready,
+    "MINIMUM_REAL_SHOPS": shops["Shop_ID"].nunique() >= dq["minimum_shops"],
+    "PRODUCTS_PER_SHOP": products_per_shop_ready,
+    "REVIEWS_PER_PRODUCT": reviews_per_product_ready,
     "REVIEW_METADATA_COMPLETE": bool(reviews["rating"].notna().all() and reviews["has_image"].notna().all()),
     "PROVENANCE_COMPLETE": bool(products[["product_url","Time_Collected","Data_Source"]].notna().all(axis=1).all() and reviews[["source_url","Time_Collected","Data_Source","Verification_Status"]].notna().all(axis=1).all()),
     "SELLER_METRICS": not seller_metrics.empty,
     "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) <= {0.0,0.5,1.0},
-    "AUTHENTICITY_REPORT": exists("output/reports/Shop_Authenticity_Report.csv"),
+    "AUTHENTICITY_REPORT": authenticity_ready,
     "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
     "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and float(metrics.get("accuracy",0)) > float(CONFIG["classification"]["accuracy_target"]),
     "CLASSIFICATION_MACRO_F1": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and pd.notna(metrics.get("macro_f1")),
@@ -228,7 +235,7 @@ items = {
 }
 items = {name:bool(value) for name,value in items.items()}
 text = "\n".join(f"{name:<32} {'PASS' if value else 'FAIL'}" for name, value in items.items())
-text += f"\n\nCOUNTS: shops={shops['Shop_ID'].nunique()}, products={products['product_id'].nunique()}, reviews={len(reviews)}\nFINAL_REPORT_PAGES: {report_pages}\n\nOVERALL: {'READY FOR SUBMISSION' if all(items.values()) else 'NOT READY FOR SUBMISSION'}\n"
+text += f"\n\nCOUNTS: shops={shops['Shop_ID'].nunique()}, products={products['product_id'].nunique()}, reviews={len(reviews)}, text_reviews={len(reviews_with_text)}\nFINAL_REPORT_PAGES: {report_pages}\n\nOVERALL: {'READY FOR SUBMISSION' if all(items.values()) else 'NOT READY FOR SUBMISSION'}\n"
 (OUTPUT / "reports" / "submission_check.txt").write_text(text, encoding="utf-8")
 (OUTPUT / "reports" / "submission_check.json").write_text(json.dumps({"checks":items,"overall_ready":all(items.values())},ensure_ascii=False,indent=2),encoding="utf-8")
 print(text)
@@ -433,6 +440,8 @@ else:
     report = reviews.groupby("Shop_ID").agg(Total_Reviews=("review_id","count"),Authentic_Review_Rate=("Is_Authentic","mean"),Suspicious_Review_Rate=("Is_Authentic",lambda s:(s==0).mean())).reset_index()
     reviews.to_csv(PROCESSED / "reviews_clustered.csv", index=False)
     report.to_csv(OUTPUT / "reports" / "Shop_Authenticity_Report.csv", index=False)
+    auth_metadata = {"input_fingerprint":INPUT_FINGERPRINT,"authenticity_mapping":{str(k):float(v) for k,v in mapping.items()},"cluster_count":int(reviews["Cluster_Label"].nunique())}
+    (OUTPUT / "reports" / "authenticity_metadata.json").write_text(json.dumps(auth_metadata,ensure_ascii=False,indent=2),encoding="utf-8")
     display(report)
 ''')],
 

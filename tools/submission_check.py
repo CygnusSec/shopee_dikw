@@ -112,6 +112,15 @@ def evaluate(root: Path = ROOT) -> dict:
         conversion = pd.to_numeric(seller_frame.get("Conversion_Rate_pct"), errors="coerce")
         seller_valid = bool(not seller_frame.empty and required <= set(seller_frame) and conversion.notna().all() and conversion.between(0, 100).all() and not seller_frame.duplicated(["Shop_ID", "product_id"]).any())
     mapping = config["clustering"].get("authenticity_mapping") or {}
+    auth_metadata_path = root / "output/reports/authenticity_metadata.json"
+    auth_metadata = json.loads(auth_metadata_path.read_text(encoding="utf-8")) if auth_metadata_path.exists() else {}
+    expected_mapping = {str(key): float(value) for key, value in mapping.items()}
+    authenticity_ready = bool(
+        mapping
+        and (root / "output/reports/Shop_Authenticity_Report.csv").exists()
+        and auth_metadata.get("input_fingerprint") == input_fingerprint
+        and auth_metadata.get("authenticity_mapping") == expected_mapping
+    )
     metrics_path = root / "output/reports/classification_metrics.json"
     metrics = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else {}
     regression_metrics_path = root / "output/reports/regression_metrics.json"
@@ -164,7 +173,7 @@ def evaluate(root: Path = ROOT) -> dict:
         "REVIEW_IMAGE_COMPLETE": complete_column(review_frame, "has_image"),
         "SELLER_METRICS": seller_valid,
         "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float, mapping.values())) <= {0.0, 0.5, 1.0},
-        "AUTHENTICITY_REPORT": (root / "output/reports/Shop_Authenticity_Report.csv").exists(),
+        "AUTHENTICITY_REPORT": authenticity_ready,
         "CLASSIFICATION_RESULT": (root / "output/reports/Classification_Result.csv").exists() and metrics.get("input_fingerprint") == input_fingerprint,
         "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == input_fingerprint and float(metrics.get("accuracy", 0)) > float(config["classification"]["accuracy_target"]),
         "CLASSIFICATION_MACRO_F1": metrics.get("input_fingerprint") == input_fingerprint and pd.notna(metrics.get("macro_f1")),
