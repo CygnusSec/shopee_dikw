@@ -9,9 +9,9 @@ response_rate_range,FAIL,PASS,0,"Chat response in [0,100]"
 shop_dates,FAIL,PASS,0,Time_Collected must be a date
 unique_product_id,FAIL,PASS,0,product_id must be globally unique
 product_rating_range,FAIL,PASS,0,"Observed Review_stars in [0,5]"
-product_rating_missing,WARNING,PASS,0,Missing rating remains null
+product_rating_missing,WARNING,WARNING,23,Missing rating remains null
 product_units_sold_negative,FAIL,PASS,0,Observed units_sold must be non-negative
-product_units_sold_missing,WARNING,WARNING,30,Missing sales remains null; never substitute ratings
+product_units_sold_missing,WARNING,WARNING,100,Missing sales remains null; never substitute ratings
 product_provenance,WARNING,PASS,0,"Products should have URL, date and source"
 unique_review_id,FAIL,PASS,0,review_id must be unique
 review_rating_range,FAIL,PASS,0,"Observed rating in [1,5]"
@@ -19,14 +19,14 @@ review_rating_missing,WARNING,PASS,0,Unverified rating remains null
 review_has_image,FAIL,PASS,0,Observed has_image must be binary
 review_has_image_missing,WARNING,PASS,0,Unverified image flag remains null
 review_text,WARNING,WARNING,19,Rating-only reviews remain raw but are excluded from text analysis
-review_provenance,WARNING,WARNING,150,"Reviews should have URL, collection date, source and verification status"
+review_provenance,WARNING,WARNING,750,"Reviews should have URL, collection date, source and verification status"
 seller_key_unique,FAIL,PASS,0,Seller export must have one row per shop/product
 conversion_range,FAIL,PASS,0,"Conversion rate in [0,100]"
 product_shop_fk,FAIL,PASS,0,Every product shop exists
 review_shop_fk,FAIL,PASS,0,Every review shop exists
 review_product_fk,FAIL,PASS,0,Every review product exists
 review_product_shop_match,FAIL,PASS,0,Review Shop_ID agrees with its product
-minimum_shops,WARNING,WARNING,12,At least 15 real shops
+minimum_shops,WARNING,PASS,0,At least 15 real shops
 products_per_shop,WARNING,PASS,0,Each shop needs 5–10 products
 reviews_per_product,WARNING,WARNING,9,Each product needs at least five text reviews
 seller_metrics_present,WARNING,WARNING,1,Authorized Seller Centre export is required

@@ -1,5 +1,5 @@
 THREE_DATA_TYPES                 PASS
-MINIMUM_REAL_SHOPS               FAIL
+MINIMUM_REAL_SHOPS               PASS
 PRODUCTS_PER_SHOP                PASS
 REVIEWS_PER_PRODUCT              FAIL
 REVIEW_METADATA_COMPLETE         PASS
@@ -16,7 +16,7 @@ POWER_BI_VERIFIED                FAIL
 FINAL_REPORT_10_PAGES            FAIL
 COLAB_DRIVE_ACCESS               FAIL
 
-COUNTS: shops=3, products=30, reviews=150, text_reviews=131
+COUNTS: shops=15, products=100, reviews=750, text_reviews=731
 FINAL_REPORT_PAGES: 0
 
 OVERALL: NOT READY FOR SUBMISSION

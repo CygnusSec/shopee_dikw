@@ -1,0 +1,4 @@
+﻿Shop_ID,Shop_Name,Shop_type,Years_Active,Is_Online_Now,Total_Products,Follower_Count_k,Rating_Average,Total_Ratings_k,Chat_Response_Rate_pct,Has_Voucher,Time_Collected,Sales,Total_Reviews,Authentic_Review_Rate,Suspicious_Review_Rate,Target_Label,Labeler,Label_Reason,Review_Status
+01_001,Maison Online,Shopee Mall,,1,11400,104.5,4.8,,87,1.0,1970-01-01,,31,0.7580645161290323,0.064516129032258,,,,
+01_002,AstroMazing Official Store,Shopee Mall,,1,108,129.8,4.9,,95,1.0,1970-01-01,,50,1.0,0.0,,,,
+01_003,Camelia Brand,Shopee Mall,,1,90,524.6,4.9,,100,,1970-01-01,,50,1.0,0.0,,,,

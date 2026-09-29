@@ -1,7 +1,7 @@
 {
   "checks": {
     "THREE_DATA_TYPES": true,
-    "MINIMUM_REAL_SHOPS": false,
+    "MINIMUM_REAL_SHOPS": true,
     "PRODUCTS_PER_SHOP": true,
     "REVIEWS_PER_PRODUCT": false,
     "REVIEW_METADATA_COMPLETE": true,
