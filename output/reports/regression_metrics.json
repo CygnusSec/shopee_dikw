@@ -1,5 +1,5 @@
 {
-  "input_fingerprint": "392c442228fb9419a03b2e2b048bbb9a4a9350b1b2a918061f24fac330501142",
+  "input_fingerprint": "ffd74b13d032b8f45851e7c2ee986aa9a766cc1f44f58755688039a237e54cd8",
   "active_features": [
     "Years_Active",
     "Total_Products",
@@ -10,7 +10,7 @@
   "excluded_features": [
     "Conversion_Rate_pct"
   ],
-  "MAE": 210.56993029017283,
-  "RMSE": 247.4299306606988,
-  "R2": -20.15634417863455
+  "MAE": 210.56993029017323,
+  "RMSE": 247.4299306606989,
+  "R2": -20.156344178634566
 }
