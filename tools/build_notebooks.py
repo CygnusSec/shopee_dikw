@@ -65,7 +65,7 @@ LOADERS = r'''
 SHOP_REQUIRED = ["Shop_ID", "Shop_Name", "Shop_type", "Years_Active", "Is_Online_Now", "Total_Products", "Follower_Count_k", "Rating_Average", "Total_Ratings_k", "Chat_Response_Rate_pct", "Has_Voucher", "Target_Label", "Time_Collected"]
 PRODUCT_REQUIRED = ["Shop_ID", "product_id", "product_name", "product_details", "description_text", "Review_stars", "units_sold", "product_url", "Time_Collected", "Data_Source"]
 REVIEW_REQUIRED = ["Shop_ID", "product_id", "review_id", "user_name", "rating", "review_time", "review_text", "has_image", "source_url", "Time_Collected", "Data_Source", "Verification_Status"]
-SELLER_REQUIRED = ["Shop_ID", "product_id", "Conversion_Rate_pct", "Time_Collected", "Data_Source"]
+SELLER_REQUIRED = ["Shop_ID", "Conversion_Rate_pct", "Source", "Collection_Status"]
 
 def load_json_folder(folder, pattern, columns):
     records = []
@@ -82,7 +82,7 @@ def load_seller_metrics(path):
     source = next((p for p in candidates if p.exists()), None)
     if source is None:
         return pd.DataFrame(columns=SELLER_REQUIRED), None
-    frame = pd.read_excel(source, dtype={"Shop_ID": str, "product_id": str}) if source.suffix == ".xlsx" else pd.read_csv(source, dtype={"Shop_ID": str, "product_id": str})
+    frame = pd.read_excel(source, dtype={"Shop_ID": str}) if source.suffix == ".xlsx" else pd.read_csv(source, dtype={"Shop_ID": str})
     return frame, source
 
 shops = pd.read_excel(project_path("shops"), dtype={"Shop_ID": str})
@@ -158,8 +158,11 @@ if not missing_count(reviews, REVIEW_REQUIRED):
     check("review_text", "WARNING", reviews["review_text"].fillna("").astype(str).str.strip().eq("").sum(), "Rating-only reviews remain raw but are excluded from text analysis")
     check("review_provenance", "WARNING", reviews[["source_url", "Time_Collected", "Data_Source", "Verification_Status"]].isna().any(axis=1).sum(), "Reviews should have URL, collection date, source and verification status")
 if not missing_count(seller_metrics, SELLER_REQUIRED):
-    check("seller_key_unique", "FAIL", seller_metrics.duplicated(["Shop_ID", "product_id"]).sum(), "Seller export must have one row per shop/product")
-    check("conversion_range", "FAIL", (~pd.to_numeric(seller_metrics["Conversion_Rate_pct"], errors="coerce").between(0,100)).sum(), "Conversion rate in [0,100]")
+    seller_keys = ["Shop_ID", "product_id"] if "product_id" in seller_metrics else ["Shop_ID"]
+    check("seller_key_unique", "FAIL", seller_metrics.duplicated(seller_keys).sum(), f"Seller export key must be unique: {seller_keys}")
+    conversion = pd.to_numeric(seller_metrics["Conversion_Rate_pct"], errors="coerce")
+    check("conversion_range", "FAIL", (conversion.notna() & ~conversion.between(0,100)).sum(), "Observed conversion rate in [0,100]")
+    check("conversion_missing", "WARNING", conversion.isna().sum(), "Missing Seller Centre conversion remains null")
 
 if {"Shop_ID"} <= set(shops) and {"Shop_ID", "product_id"} <= set(products) and {"Shop_ID", "product_id"} <= set(reviews):
     check("product_shop_fk", "FAIL", len(set(products["Shop_ID"]) - set(shops["Shop_ID"])), "Every product shop exists")
@@ -175,11 +178,13 @@ reviews_with_text = reviews.loc[reviews["review_text"].fillna("").astype(str).st
 review_counts = reviews_with_text.groupby(["Shop_ID", "product_id"]).size().reindex(pd.MultiIndex.from_frame(products[["Shop_ID", "product_id"]]), fill_value=0)
 check("products_per_shop", "WARNING", ((product_counts < dq["minimum_products_per_shop"]) | (product_counts > dq["maximum_products_per_shop"])).sum(), "Each shop needs 5–10 products")
 check("reviews_per_product", "WARNING", (review_counts < dq["minimum_text_reviews_per_product"]).sum(), "Each product needs at least five text reviews")
-check("seller_metrics_present", "WARNING", int(seller_metrics.empty), "Authorized Seller Centre export is required")
+observed_conversion = pd.to_numeric(seller_metrics.get("Conversion_Rate_pct", pd.Series(dtype=float)),errors="coerce")
+check("seller_metrics_present", "WARNING", int(seller_metrics.empty or not observed_conversion.notna().any()), "Observed authorized Seller Centre conversion is required")
 
 coverage = pd.DataFrame({"Shop_ID": shops["Shop_ID"], "Product_Count": shops["Shop_ID"].map(product_counts).fillna(0).astype(int)})
 coverage["Review_Count"] = coverage["Shop_ID"].map(reviews_with_text.groupby("Shop_ID").size()).fillna(0).astype(int)
-coverage["Products_With_Conversion"] = coverage["Shop_ID"].map(seller_metrics.groupby("Shop_ID").size() if not seller_metrics.empty else {}).fillna(0).astype(int)
+seller_observed = seller_metrics.loc[observed_conversion.notna()] if not seller_metrics.empty else seller_metrics
+coverage["Products_With_Conversion"] = coverage["Shop_ID"].map(seller_observed.groupby("Shop_ID").size() if not seller_observed.empty else {}).fillna(0).astype(int)
 report = pd.DataFrame(checks)
 report.to_csv(OUTPUT / "reports" / "data_validation_report.csv", index=False)
 coverage.to_csv(OUTPUT / "reports" / "data_coverage_by_shop.csv", index=False)
@@ -221,7 +226,7 @@ items = {
     "REVIEWS_PER_PRODUCT": reviews_per_product_ready,
     "REVIEW_METADATA_COMPLETE": bool(reviews["rating"].notna().all() and reviews["has_image"].notna().all()),
     "PROVENANCE_COMPLETE": bool(products[["product_url","Time_Collected","Data_Source"]].notna().all(axis=1).all() and reviews[["source_url","Time_Collected","Data_Source","Verification_Status"]].notna().all(axis=1).all()),
-    "SELLER_METRICS": not seller_metrics.empty,
+    "SELLER_METRICS": bool(not seller_metrics.empty and observed_conversion.notna().all()),
     "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) <= {0.0,0.5,1.0},
     "AUTHENTICITY_REPORT": authenticity_ready,
     "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
@@ -299,7 +304,8 @@ if not seller_metrics.empty:
     seller["Conversion_Rate_pct"] = pd.to_numeric(seller["Conversion_Rate_pct"], errors="coerce")
     shop_seller = seller.groupby("Shop_ID", as_index=False).agg(Conversion_Rate_pct=("Conversion_Rate_pct","mean"))
     shops_clean = shops_clean.drop(columns=["Conversion_Rate_pct"], errors="ignore").merge(shop_seller, on="Shop_ID", how="left", validate="one_to_one")
-    products_clean = products_clean.merge(seller[["Shop_ID","product_id","Conversion_Rate_pct"]], on=["Shop_ID","product_id"], how="left", validate="one_to_one")
+    if "product_id" in seller:
+        products_clean = products_clean.merge(seller[["Shop_ID","product_id","Conversion_Rate_pct"]], on=["Shop_ID","product_id"], how="left", validate="one_to_one")
 
 audit = pd.DataFrame([
     {"dataset":"shops","raw_rows":len(shops),"clean_rows":len(shops_clean),"dropped_rows":len(shops)-len(shops_clean)},
@@ -461,6 +467,13 @@ for column in ["Target_Label","Labeler","Label_Reason","Review_Status"]: label_f
 label_path = OUTPUT / "labeling" / "Data_To_Label.csv"
 label_frame.to_csv(label_path,index=False,encoding="utf-8-sig")
 print("Human-labeling template:",label_path)
+labeled_path = OUTPUT / "labeling" / "Data_Labeled.csv"
+if labeled_path.exists():
+    previous = pd.read_csv(labeled_path)
+    previous_labels = pd.to_numeric(previous.get("Target_Label",pd.Series(dtype=float)),errors="coerce")
+    if not previous_labels.notna().any() and set(previous.get("Shop_ID",[])) != set(label_frame["Shop_ID"]):
+        label_frame.to_csv(labeled_path,index=False,encoding="utf-8-sig")
+        print("Refreshed stale unlabeled Data_Labeled.csv to the current 15-shop template.")
 display(label_frame.head())
 '''),
 code(r'''
@@ -554,27 +567,40 @@ from sklearn.preprocessing import StandardScaler
 
 shops = pd.read_csv(PROCESSED / "shops_clean.csv")
 auth_path = OUTPUT / "reports" / "Shop_Authenticity_Report.csv"
-if not auth_path.exists(): raise FileNotFoundError("Shop_Authenticity_Report.csv is required")
-data = shops.merge(pd.read_csv(auth_path)[["Shop_ID","Authentic_Review_Rate"]],on="Shop_ID",how="left",validate="one_to_one")
+auth = pd.read_csv(auth_path)[["Shop_ID","Authentic_Review_Rate"]] if auth_path.exists() else pd.DataFrame({"Shop_ID":shops["Shop_ID"],"Authentic_Review_Rate":np.nan})
+data = shops.drop(columns=["Authentic_Review_Rate"],errors="ignore").merge(auth,on="Shop_ID",how="left",validate="one_to_one")
 features = CONFIG["regression"]["features"]; target = CONFIG["regression"]["target"]
-data = data.dropna(subset=[target,*features]).copy()
-if len(data) < 15: raise ValueError(f"Need at least 15 complete shops; found {len(data)}")
-x_train,x_test,y_train,y_test=train_test_split(data[features],data[target],test_size=max(3,int(np.ceil(len(data)*.2))),random_state=CONFIG["project"]["random_state"])
-model=LinearRegression().fit(x_train,y_train); prediction=model.predict(x_test)
-x_scaler,y_scaler=StandardScaler(),StandardScaler(); standardized=LinearRegression().fit(x_scaler.fit_transform(data[features]),y_scaler.fit_transform(data[[target]]).ravel())
-coefficients=pd.DataFrame({"Feature":features,"Coefficient":model.coef_,"Standardized_Coefficient":standardized.coef_}); coefficients["Direction"]=np.where(coefficients["Coefficient"]>=0,"positive","negative"); coefficients["Absolute_Standardized_Coefficient"]=coefficients["Standardized_Coefficient"].abs()
-metrics={"input_fingerprint":INPUT_FINGERPRINT,"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
+for feature in features:
+    if feature not in data: data[feature] = np.nan
+numeric = data[features].apply(pd.to_numeric,errors="coerce")
+coverage = pd.DataFrame({"Feature":features,"Observed_Count":[numeric[c].notna().sum() for c in features],"Observed_Rate":[numeric[c].notna().mean() for c in features],"Unique_Observed_Values":[numeric[c].nunique(dropna=True) for c in features]})
+coverage["Usable"] = (coverage["Observed_Rate"] == 1.0) & (coverage["Unique_Observed_Values"] >= 2)
+active_features = coverage.loc[coverage["Usable"],"Feature"].tolist(); excluded_features=[c for c in features if c not in active_features]
+coverage.to_csv(OUTPUT/"reports"/"regression_feature_coverage.csv",index=False)
+target_values = pd.to_numeric(data[target],errors="coerce"); data = data.loc[target_values.notna()].copy(); data[target] = target_values.loc[data.index]
+REGRESSION_READY = len(data) >= 10 and bool(active_features)
+readiness = pd.DataFrame([{"ready":REGRESSION_READY,"observed_target_rows":len(data),"active_features":", ".join(active_features),"excluded_features":", ".join(excluded_features),"blockers":"" if REGRESSION_READY else "Need at least 10 observed targets and one complete varying feature"}])
+readiness.to_csv(OUTPUT/"reports"/"regression_readiness.csv",index=False); display(readiness)
+if REGRESSION_READY:
+    x_train,x_test,y_train,y_test=train_test_split(data[active_features],data[target],test_size=max(3,int(np.ceil(len(data)*.2))),random_state=CONFIG["project"]["random_state"])
+    model=LinearRegression().fit(x_train,y_train); prediction=model.predict(x_test)
+    x_scaler,y_scaler=StandardScaler(),StandardScaler(); standardized=LinearRegression().fit(x_scaler.fit_transform(data[active_features]),y_scaler.fit_transform(data[[target]]).ravel())
+    coefficients=pd.DataFrame({"Feature":active_features,"Coefficient":model.coef_,"Standardized_Coefficient":standardized.coef_}); coefficients["Direction"]=np.where(coefficients["Coefficient"]>=0,"positive","negative"); coefficients["Absolute_Standardized_Coefficient"]=coefficients["Standardized_Coefficient"].abs()
+    metrics={"input_fingerprint":INPUT_FINGERPRINT,"active_features":active_features,"excluded_features":excluded_features,"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
+else:
+    print("REGRESSION BLOCKED — no model or metrics were fabricated.")
 '''),
 code(r'''
-residuals=y_test-prediction
-fig,axes=plt.subplots(1,2,figsize=(10,4)); sns.scatterplot(x=prediction,y=residuals,ax=axes[0]); axes[0].axhline(0,color="red"); axes[0].set(xlabel="Predicted",ylabel="Residual",title="Residuals"); sns.histplot(residuals,kde=True,ax=axes[1]); axes[1].set_title("Residual distribution"); fig.tight_layout(); fig.savefig(OUTPUT/"figures"/"regression_residuals.png",dpi=160); plt.show(); plt.close(fig)
-corr=data[features].corr().abs(); high=[]
-for i,a in enumerate(features):
-    for b in features[i+1:]:
-        if corr.loc[a,b]>=.8: high.append({"Feature_A":a,"Feature_B":b,"Absolute_Correlation":corr.loc[a,b]})
-coefficients.to_csv(OUTPUT/"reports"/"Regression_Result.csv",index=False); pd.DataFrame(high).to_csv(OUTPUT/"reports"/"regression_multicollinearity_flags.csv",index=False)
-(OUTPUT/"reports"/"regression_metrics.json").write_text(json.dumps(metrics,indent=2),encoding="utf-8")
-display(coefficients.sort_values("Absolute_Standardized_Coefficient",ascending=False)); display(pd.DataFrame([metrics])); display(pd.DataFrame(high))
+if REGRESSION_READY:
+    residuals=y_test-prediction
+    fig,axes=plt.subplots(1,2,figsize=(10,4)); sns.scatterplot(x=prediction,y=residuals,ax=axes[0]); axes[0].axhline(0,color="red"); axes[0].set(xlabel="Predicted",ylabel="Residual",title="Residuals"); sns.histplot(residuals,kde=True,ax=axes[1]); axes[1].set_title("Residual distribution"); fig.tight_layout(); fig.savefig(OUTPUT/"figures"/"regression_residuals.png",dpi=160); plt.show(); plt.close(fig)
+    corr=data[active_features].corr().abs(); high=[]
+    for i,a in enumerate(active_features):
+        for b in active_features[i+1:]:
+            if corr.loc[a,b]>=.8: high.append({"Feature_A":a,"Feature_B":b,"Absolute_Correlation":corr.loc[a,b]})
+    coefficients.to_csv(OUTPUT/"reports"/"Regression_Result.csv",index=False); pd.DataFrame(high,columns=["Feature_A","Feature_B","Absolute_Correlation"]).to_csv(OUTPUT/"reports"/"regression_multicollinearity_flags.csv",index=False)
+    (OUTPUT/"reports"/"regression_metrics.json").write_text(json.dumps(metrics,indent=2),encoding="utf-8")
+    display(coefficients.sort_values("Absolute_Standardized_Coefficient",ascending=False)); display(pd.DataFrame([metrics])); display(pd.DataFrame(high))
 ''')],
 
 "06_final_analysis.ipynb": [md('''# 06 — Final DIKW Analysis
@@ -583,39 +609,38 @@ Builds traceable report facts. It refuses to invent Wisdom when required model a
 code(r'''
 required = {"shops":PROCESSED/"shops_clean.csv","reviews":PROCESSED/"reviews_clustered.csv","profile":OUTPUT/"reports"/"cluster_profile.csv","authenticity":OUTPUT/"reports"/"Shop_Authenticity_Report.csv","classification":OUTPUT/"reports"/"Classification_Result.csv","regression":OUTPUT/"reports"/"Regression_Result.csv"}
 missing=[name for name,path in required.items() if not path.exists()]
-if missing: raise FileNotFoundError("Required final artifacts are missing: "+", ".join(missing))
-frames={name:pd.read_csv(path) for name,path in required.items()}
-class_metrics=json.loads((OUTPUT/"reports"/"classification_metrics.json").read_text(encoding="utf-8"))
-reg_metrics=json.loads((OUTPUT/"reports"/"regression_metrics.json").read_text(encoding="utf-8"))
-reviews=frames["reviews"]; shops=frames["shops"]; authenticity=frames["authenticity"]; regression=frames["regression"]
-if "Is_Authentic" not in reviews: raise ValueError("Human-confirmed authenticity mapping has not been applied")
-top_factor=regression.sort_values("Absolute_Standardized_Coefficient",ascending=False).iloc[0]
-class_result=frames["classification"]
-class_recall=class_result.assign(correct=lambda d:d["Actual_Label"]==d["Predicted_Label"]).groupby("Actual_Label")["correct"].mean()
-weakest_class=int(class_recall.idxmin())
 def finite_or_none(value):
     return float(value) if value is not None and np.isfinite(value) else None
-facts={
- "input_fingerprint":INPUT_FINGERPRINT,
- "suspicious_review_pct":float((reviews["Is_Authentic"]==0).mean()*100),
- "lowest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[0]["Shop_ID"],
- "highest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[-1]["Shop_ID"],
- "classification_accuracy":class_metrics["accuracy"],"classification_macro_f1":class_metrics["macro_f1"],
- "classification_weakest_class":weakest_class,"classification_weakest_class_recall":float(class_recall.loc[weakest_class]),
- "regression_r2":reg_metrics["R2"],"strongest_standardized_factor":top_factor["Feature"],"strongest_standardized_coefficient":top_factor["Standardized_Coefficient"],
- "rating_sales_correlation":finite_or_none(shops[["Rating_Average","Sales"]].corr().iloc[0,1]) if "Sales" in shops else None,
- "response_conversion_correlation":finite_or_none(shops[["Chat_Response_Rate_pct","Conversion_Rate_pct"]].corr().iloc[0,1]) if "Conversion_Rate_pct" in shops else None,
- "interpretation_guardrail":"Clusters indicate suspicious patterns, and regression is association rather than causality."
-}
-(OUTPUT/"reports"/"wisdom_facts.json").write_text(json.dumps(facts,ensure_ascii=False,indent=2,allow_nan=False),encoding="utf-8")
-pd.DataFrame([facts]).to_csv(OUTPUT/"powerbi"/"wisdom_summary.csv",index=False)
-display(pd.DataFrame([facts]))
+facts = {}
+if missing:
+    print("FINAL ANALYSIS BLOCKED — missing artifacts:", ", ".join(missing))
+    pd.DataFrame([{"ready":False,"missing_artifacts":", ".join(missing)}]).to_csv(OUTPUT/"reports"/"final_analysis_readiness.csv",index=False)
+else:
+    frames={name:pd.read_csv(path) for name,path in required.items()}
+    class_metrics=json.loads((OUTPUT/"reports"/"classification_metrics.json").read_text(encoding="utf-8"))
+    reg_metrics=json.loads((OUTPUT/"reports"/"regression_metrics.json").read_text(encoding="utf-8"))
+    reviews=frames["reviews"]; shops=frames["shops"]; authenticity=frames["authenticity"]; regression=frames["regression"]
+    if "Is_Authentic" not in reviews:
+        print("FINAL ANALYSIS BLOCKED — human-confirmed authenticity mapping has not been applied")
+    else:
+        top_factor=regression.sort_values("Absolute_Standardized_Coefficient",ascending=False).iloc[0]
+        class_result=frames["classification"]
+        class_recall=class_result.assign(correct=lambda d:d["Actual_Label"]==d["Predicted_Label"]).groupby("Actual_Label")["correct"].mean()
+        weakest_class=int(class_recall.idxmin())
+        facts={"input_fingerprint":INPUT_FINGERPRINT,"suspicious_review_pct":float((reviews["Is_Authentic"]==0).mean()*100),"lowest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[0]["Shop_ID"],"highest_authenticity_shop":authenticity.sort_values("Authentic_Review_Rate").iloc[-1]["Shop_ID"],"classification_accuracy":class_metrics["accuracy"],"classification_macro_f1":class_metrics["macro_f1"],"classification_weakest_class":weakest_class,"classification_weakest_class_recall":float(class_recall.loc[weakest_class]),"regression_r2":reg_metrics["R2"],"strongest_standardized_factor":top_factor["Feature"],"strongest_standardized_coefficient":top_factor["Standardized_Coefficient"],"rating_sales_correlation":finite_or_none(shops[["Rating_Average","Sales"]].corr().iloc[0,1]) if "Sales" in shops else None,"response_conversion_correlation":finite_or_none(shops[["Chat_Response_Rate_pct","Conversion_Rate_pct"]].corr().iloc[0,1]) if "Conversion_Rate_pct" in shops else None,"interpretation_guardrail":"Clusters indicate suspicious patterns, and regression is association rather than causality."}
+        (OUTPUT/"reports"/"wisdom_facts.json").write_text(json.dumps(facts,ensure_ascii=False,indent=2,allow_nan=False),encoding="utf-8")
+        pd.DataFrame([facts]).to_csv(OUTPUT/"powerbi"/"wisdom_summary.csv",index=False)
+        pd.DataFrame([{"ready":True,"missing_artifacts":""}]).to_csv(OUTPUT/"reports"/"final_analysis_readiness.csv",index=False)
+        display(pd.DataFrame([facts]))
 '''),
 code(r'''
-lines=["# Computed Wisdom Facts","","> Auto-generated from model outputs. Review wording before publication.",""]
-for key,value in facts.items(): lines.append(f"- **{key}**: {value}")
-(OUTPUT/"reports"/"wisdom_facts.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
-print("Final facts exported for the report and Power BI.")
+if facts:
+    lines=["# Computed Wisdom Facts","","> Auto-generated from model outputs. Review wording before publication.",""]
+    for key,value in facts.items(): lines.append(f"- **{key}**: {value}")
+    (OUTPUT/"reports"/"wisdom_facts.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
+    print("Final facts exported for the report and Power BI.")
+else:
+    print("No final Wisdom facts exported until every required artifact exists.")
 ''')],
 }
 

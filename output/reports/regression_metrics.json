@@ -1,0 +1,16 @@
+{
+  "input_fingerprint": "392c442228fb9419a03b2e2b048bbb9a4a9350b1b2a918061f24fac330501142",
+  "active_features": [
+    "Years_Active",
+    "Total_Products",
+    "Rating_Average",
+    "Chat_Response_Rate_pct",
+    "Authentic_Review_Rate"
+  ],
+  "excluded_features": [
+    "Conversion_Rate_pct"
+  ],
+  "MAE": 210.56993029017283,
+  "RMSE": 247.4299306606988,
+  "R2": -20.15634417863455
+}

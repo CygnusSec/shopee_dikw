@@ -4,14 +4,16 @@
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["Shop_ID", "product_id", "Conversion_Rate_pct", "Time_Collected", "Data_Source"],
+    "required": ["Shop_ID", "Conversion_Rate_pct", "Source", "Collection_Status"],
     "properties": {
       "Shop_ID": {"type": "string", "pattern": "^[^_]+_[^_]+$"},
       "product_id": {"type": "string", "pattern": "^sp_"},
-      "Conversion_Rate_pct": {"type": "number", "minimum": 0, "maximum": 100},
-      "Units_Sold": {"type": "number", "minimum": 0},
-      "Time_Collected": {"type": "string", "format": "date"},
-      "Data_Source": {"type": "string", "minLength": 1}
+      "Conversion_Rate_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+      "Units_Sold": {"type": ["number", "null"], "minimum": 0},
+      "Time_Collected": {"type": ["string", "null"], "format": "date"},
+      "Data_Source": {"type": "string", "minLength": 1},
+      "Source": {"type": "string", "minLength": 1},
+      "Collection_Status": {"type": "string", "minLength": 1}
     }
   }
 }

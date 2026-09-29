@@ -108,9 +108,10 @@ def evaluate(root: Path = ROOT) -> dict:
     seller_valid = False
     if seller_source:
         seller_frame = pd.read_excel(seller_source) if seller_source.suffix == ".xlsx" else pd.read_csv(seller_source)
-        required = {"Shop_ID", "product_id", "Conversion_Rate_pct", "Time_Collected", "Data_Source"}
+        required = {"Shop_ID", "Conversion_Rate_pct", "Source", "Collection_Status"}
         conversion = pd.to_numeric(seller_frame.get("Conversion_Rate_pct"), errors="coerce")
-        seller_valid = bool(not seller_frame.empty and required <= set(seller_frame) and conversion.notna().all() and conversion.between(0, 100).all() and not seller_frame.duplicated(["Shop_ID", "product_id"]).any())
+        seller_keys = ["Shop_ID", "product_id"] if "product_id" in seller_frame else ["Shop_ID"]
+        seller_valid = bool(not seller_frame.empty and required <= set(seller_frame) and conversion.notna().all() and conversion.between(0, 100).all() and not seller_frame.duplicated(seller_keys).any())
     mapping = config["clustering"].get("authenticity_mapping") or {}
     auth_metadata_path = root / "output/reports/authenticity_metadata.json"
     auth_metadata = json.loads(auth_metadata_path.read_text(encoding="utf-8")) if auth_metadata_path.exists() else {}

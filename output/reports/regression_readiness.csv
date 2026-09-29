@@ -1,0 +1,2 @@
+ready,observed_target_rows,active_features,excluded_features,blockers
+True,15,"Years_Active, Total_Products, Rating_Average, Chat_Response_Rate_pct, Authentic_Review_Rate",Conversion_Rate_pct,

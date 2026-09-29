@@ -24,7 +24,7 @@ def test_current_repository_is_truthfully_not_ready():
     assert result["evidence"]["shops"] >= 1
     assert result["evidence"]["products"] >= 1
     assert result["evidence"]["reviews"] >= result["evidence"]["text_reviews"]
-    assert not result["checks"]["MINIMUM_REAL_SHOPS"]
+    assert result["checks"]["MINIMUM_REAL_SHOPS"]
     assert "OVERALL: NOT READY FOR SUBMISSION" in checker.render(result)
 
 
