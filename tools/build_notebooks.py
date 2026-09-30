@@ -103,14 +103,39 @@ for column in PRODUCT_REQUIRED:
 if "product_details" in products:
     detail_url = products["product_details"].map(lambda value: value.get("source_product_url") if isinstance(value, dict) else None)
     detail_date = products["product_details"].map(lambda value: value.get("collection_date") if isinstance(value, dict) else None)
+    sold_display = products["product_details"].map(lambda value: value.get("public_sold_display") if isinstance(value, dict) else None)
+
+    def parse_public_sold_lower_bound(value):
+        """Parse Shopee's public rounded sold display as an observed lower bound."""
+        if pd.isna(value):
+            return np.nan
+        match = __import__("re").search(r"([0-9]+(?:[.,][0-9]+)?)\s*([kKmM]?)", str(value))
+        if not match:
+            return np.nan
+        number = float(match.group(1).replace(",", "."))
+        multiplier = {"": 1, "k": 1_000, "m": 1_000_000}[match.group(2).lower()]
+        return number * multiplier
+
     products["product_url"] = products["product_url"].fillna(detail_url)
     products["Time_Collected"] = products["Time_Collected"].fillna(detail_date)
+    products["units_sold"] = pd.to_numeric(products["units_sold"], errors="coerce").fillna(sold_display.map(parse_public_sold_lower_bound))
+    products["units_sold_display"] = sold_display
+    products["units_sold_semantics"] = products["units_sold"].notna().map({True: "public_display_lower_bound", False: None})
 products["Data_Source"] = products["Data_Source"].fillna(products["product_url"])
 for column in REVIEW_REQUIRED:
     if column not in reviews: reviews[column] = np.nan
 if "collection_date" in reviews: reviews["Time_Collected"] = reviews["Time_Collected"].fillna(reviews["collection_date"])
-if "source_url" in reviews: reviews["Data_Source"] = reviews["Data_Source"].fillna(reviews["source_url"])
-reviews["Verification_Status"] = reviews["Verification_Status"].fillna("legacy_partial_metadata")
+# Reviews were collected from each product's public review endpoint/page.  Link
+# provenance through product_id in memory so the immutable raw JSON is not
+# rewritten merely to duplicate product-level collection metadata.
+product_provenance = products.drop_duplicates("product_id").set_index("product_id")
+review_source = reviews["product_id"].map(product_provenance["product_url"])
+review_collected = reviews["product_id"].map(product_provenance["Time_Collected"])
+reviews["source_url"] = reviews["source_url"].fillna(review_source)
+reviews["Time_Collected"] = reviews["Time_Collected"].fillna(review_collected)
+reviews["Data_Source"] = reviews["Data_Source"].fillna(reviews["source_url"])
+linked = reviews["source_url"].notna() & reviews["Time_Collected"].notna()
+reviews.loc[linked & reviews["Verification_Status"].isna(), "Verification_Status"] = "linked_to_product_provenance"
 print({"shops": len(shops), "products": len(products), "reviews": len(reviews), "seller_metrics": len(seller_metrics)})
 '''
 
@@ -227,7 +252,7 @@ items = {
     "REVIEW_METADATA_COMPLETE": bool(reviews["rating"].notna().all() and reviews["has_image"].notna().all()),
     "PROVENANCE_COMPLETE": bool(products[["product_url","Time_Collected","Data_Source"]].notna().all(axis=1).all() and reviews[["source_url","Time_Collected","Data_Source","Verification_Status"]].notna().all(axis=1).all()),
     "SELLER_METRICS": bool(not seller_metrics.empty and observed_conversion.notna().all()),
-    "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) <= {0.0,0.5,1.0},
+    "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) == {0.0,0.5,1.0},
     "AUTHENTICITY_REPORT": authenticity_ready,
     "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
     "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and float(metrics.get("accuracy",0)) > float(CONFIG["classification"]["accuracy_target"]),
@@ -586,7 +611,14 @@ if REGRESSION_READY:
     model=LinearRegression().fit(x_train,y_train); prediction=model.predict(x_test)
     x_scaler,y_scaler=StandardScaler(),StandardScaler(); standardized=LinearRegression().fit(x_scaler.fit_transform(data[active_features]),y_scaler.fit_transform(data[[target]]).ravel())
     coefficients=pd.DataFrame({"Feature":active_features,"Coefficient":model.coef_,"Standardized_Coefficient":standardized.coef_}); coefficients["Direction"]=np.where(coefficients["Coefficient"]>=0,"positive","negative"); coefficients["Absolute_Standardized_Coefficient"]=coefficients["Standardized_Coefficient"].abs()
-    metrics={"input_fingerprint":INPUT_FINGERPRINT,"active_features":active_features,"excluded_features":excluded_features,"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
+    metrics={"input_fingerprint":INPUT_FINGERPRINT,"active_features":active_features,"excluded_features":excluded_features,"sample_size":len(data),"train_rows":len(x_train),"test_rows":len(x_test),"MAE":mean_absolute_error(y_test,prediction),"RMSE":mean_squared_error(y_test,prediction)**.5,"R2":r2_score(y_test,prediction)}
+    quality_warnings=[]
+    if excluded_features: quality_warnings.append("Required features unavailable: " + ", ".join(excluded_features))
+    if len(data) < 30: quality_warnings.append(f"Only {len(data)} shops; holdout metrics are unstable and coefficients are exploratory")
+    if metrics["R2"] <= 0: quality_warnings.append("Negative test R2; model is worse than predicting the test-set mean")
+    metrics["quality_acceptable"] = not quality_warnings
+    metrics["interpretation_status"] = "validated" if metrics["quality_acceptable"] else "exploratory_only"
+    metrics["quality_warnings"] = quality_warnings
 else:
     print("REGRESSION BLOCKED — no model or metrics were fabricated.")
 '''),
@@ -599,6 +631,7 @@ if REGRESSION_READY:
         for b in active_features[i+1:]:
             if corr.loc[a,b]>=.8: high.append({"Feature_A":a,"Feature_B":b,"Absolute_Correlation":corr.loc[a,b]})
     coefficients.to_csv(OUTPUT/"reports"/"Regression_Result.csv",index=False); pd.DataFrame(high,columns=["Feature_A","Feature_B","Absolute_Correlation"]).to_csv(OUTPUT/"reports"/"regression_multicollinearity_flags.csv",index=False)
+    pd.DataFrame([{"training_ready":True,"quality_acceptable":metrics["quality_acceptable"],"sample_size":len(data),"R2":metrics["R2"],"warnings":"; ".join(quality_warnings)}]).to_csv(OUTPUT/"reports"/"regression_quality.csv",index=False)
     (OUTPUT/"reports"/"regression_metrics.json").write_text(json.dumps(metrics,indent=2),encoding="utf-8")
     display(coefficients.sort_values("Absolute_Standardized_Coefficient",ascending=False)); display(pd.DataFrame([metrics])); display(pd.DataFrame(high))
 ''')],

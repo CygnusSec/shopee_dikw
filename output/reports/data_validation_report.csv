@@ -11,7 +11,7 @@ unique_product_id,FAIL,PASS,0,product_id must be globally unique
 product_rating_range,FAIL,PASS,0,"Observed Review_stars in [0,5]"
 product_rating_missing,WARNING,WARNING,23,Missing rating remains null
 product_units_sold_negative,FAIL,PASS,0,Observed units_sold must be non-negative
-product_units_sold_missing,WARNING,WARNING,100,Missing sales remains null; never substitute ratings
+product_units_sold_missing,WARNING,WARNING,23,Missing sales remains null; never substitute ratings
 product_provenance,WARNING,PASS,0,"Products should have URL, date and source"
 unique_review_id,FAIL,PASS,0,review_id must be unique
 review_rating_range,FAIL,PASS,0,"Observed rating in [1,5]"
@@ -19,10 +19,10 @@ review_rating_missing,WARNING,PASS,0,Unverified rating remains null
 review_has_image,FAIL,PASS,0,Observed has_image must be binary
 review_has_image_missing,WARNING,PASS,0,Unverified image flag remains null
 review_text,WARNING,WARNING,19,Rating-only reviews remain raw but are excluded from text analysis
-review_provenance,WARNING,WARNING,750,"Reviews should have URL, collection date, source and verification status"
+review_provenance,WARNING,PASS,0,"Reviews should have URL, collection date, source and verification status"
 seller_key_unique,FAIL,PASS,0,Seller export key must be unique: ['Shop_ID']
 conversion_range,FAIL,PASS,0,"Observed conversion rate in [0,100]"
-conversion_missing,WARNING,PASS,0,Missing Seller Centre conversion remains null
+conversion_missing,WARNING,WARNING,15,Missing Seller Centre conversion remains null
 product_shop_fk,FAIL,PASS,0,Every product shop exists
 review_shop_fk,FAIL,PASS,0,Every review shop exists
 review_product_fk,FAIL,PASS,0,Every review product exists

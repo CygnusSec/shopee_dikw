@@ -14,3 +14,11 @@ Document annotators, rubric, disagreements, and resolution. Labels derived from 
 - `2 = Uy_tin`: consistently strong evidence across service, product transparency, customer feedback, and authorized commercial metrics.
 
 Each label requires `Labeler`, `Label_Reason`, and `Review_Status=approved`. At least two members review disputed cases; record both initial labels and the agreed resolution in meeting notes. Each class needs at least five shops before training.
+
+## Current cluster decision
+
+The mapping must be reviewed again whenever clustering is rerun because cluster IDs can change. For the current fingerprint, the reviewed profile is interpreted as follows:
+
+- Cluster `0 -> 1.0`: overwhelmingly positive reviews with images; authentic-like pattern.
+- Cluster `1 -> 0.0`: uniformly five-star, positive, shorter reviews without images; suspicious-pattern group, not proof of fraud.
+- Cluster `2 -> 0.5`: very small mixed-rating group; insufficient evidence, therefore uncertain.

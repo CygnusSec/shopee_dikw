@@ -1,8 +1,8 @@
 {
-  "input_fingerprint": "ffd74b13d032b8f45851e7c2ee986aa9a766cc1f44f58755688039a237e54cd8",
+  "input_fingerprint": "727357d4e77ff9a7fb3b050a5d29f6edbc92eac50b3bf47842b1189c7776ba7f",
   "authenticity_mapping": {
     "0": 1.0,
-    "1": 1.0,
+    "1": 0.0,
     "2": 0.5
   },
   "cluster_count": 3

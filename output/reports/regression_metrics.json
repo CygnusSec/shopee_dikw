@@ -1,5 +1,5 @@
 {
-  "input_fingerprint": "ffd74b13d032b8f45851e7c2ee986aa9a766cc1f44f58755688039a237e54cd8",
+  "input_fingerprint": "727357d4e77ff9a7fb3b050a5d29f6edbc92eac50b3bf47842b1189c7776ba7f",
   "active_features": [
     "Years_Active",
     "Total_Products",
@@ -10,7 +10,17 @@
   "excluded_features": [
     "Conversion_Rate_pct"
   ],
-  "MAE": 210.56993029017323,
-  "RMSE": 247.4299306606989,
-  "R2": -20.156344178634566
+  "sample_size": 15,
+  "train_rows": 12,
+  "test_rows": 3,
+  "MAE": 188.05724575602946,
+  "RMSE": 211.97626296240006,
+  "R2": -14.527824710548225,
+  "quality_acceptable": false,
+  "interpretation_status": "exploratory_only",
+  "quality_warnings": [
+    "Required features unavailable: Conversion_Rate_pct",
+    "Only 15 shops; holdout metrics are unstable and coefficients are exploratory",
+    "Negative test R2; model is worse than predicting the test-set mean"
+  ]
 }

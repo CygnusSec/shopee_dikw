@@ -97,9 +97,24 @@ def evaluate(root: Path = ROOT) -> dict:
         )
         for row in products
     )
+    product_provenance_by_id = {
+        row.get("product_id"): {
+            "source_url": row.get("product_url") or (row.get("product_details") or {}).get("source_product_url"),
+            "collected_at": row.get("Time_Collected") or (row.get("product_details") or {}).get("collection_date"),
+        }
+        for row in products
+    }
     review_provenance = bool(reviews) and all(
-        (row.get("source_url") or row.get("Data_Source"))
-        and (row.get("collection_date") or row.get("Time_Collected"))
+        (
+            row.get("source_url")
+            or row.get("Data_Source")
+            or product_provenance_by_id.get(row.get("product_id"), {}).get("source_url")
+        )
+        and (
+            row.get("collection_date")
+            or row.get("Time_Collected")
+            or product_provenance_by_id.get(row.get("product_id"), {}).get("collected_at")
+        )
         for row in reviews
     )
 
@@ -173,7 +188,7 @@ def evaluate(root: Path = ROOT) -> dict:
         "REVIEW_RATING_COMPLETE": complete_column(review_frame, "rating"),
         "REVIEW_IMAGE_COMPLETE": complete_column(review_frame, "has_image"),
         "SELLER_METRICS": seller_valid,
-        "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float, mapping.values())) <= {0.0, 0.5, 1.0},
+        "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float, mapping.values())) == {0.0, 0.5, 1.0},
         "AUTHENTICITY_REPORT": authenticity_ready,
         "CLASSIFICATION_RESULT": (root / "output/reports/Classification_Result.csv").exists() and metrics.get("input_fingerprint") == input_fingerprint,
         "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == input_fingerprint and float(metrics.get("accuracy", 0)) > float(config["classification"]["accuracy_target"]),
