@@ -1,2 +1,2 @@
 training_ready,quality_acceptable,sample_size,R2,warnings
-True,False,15,-14.527824710548142,Required features unavailable: Conversion_Rate_pct; Only 15 shops; holdout metrics are unstable and coefficients are exploratory; Negative test R2; model is worse than predicting the test-set mean
+True,False,15,-14.527824710548225,Required features unavailable: Conversion_Rate_pct; Only 15 shops; holdout metrics are unstable and coefficients are exploratory; Negative test R2; model is worse than predicting the test-set mean

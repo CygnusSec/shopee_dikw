@@ -22,7 +22,7 @@ review_text,WARNING,WARNING,19,Rating-only reviews remain raw but are excluded f
 review_provenance,WARNING,PASS,0,"Reviews should have URL, collection date, source and verification status"
 seller_key_unique,FAIL,PASS,0,Seller export key must be unique: ['Shop_ID']
 conversion_range,FAIL,PASS,0,"Observed conversion rate in [0,100]"
-conversion_missing,WARNING,PASS,0,Missing Seller Centre conversion remains null
+conversion_missing,WARNING,WARNING,15,Missing Seller Centre conversion remains null
 product_shop_fk,FAIL,PASS,0,Every product shop exists
 review_shop_fk,FAIL,PASS,0,Every review shop exists
 review_product_fk,FAIL,PASS,0,Every review product exists
