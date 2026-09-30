@@ -1,4 +1,4 @@
 dataset,raw_rows,clean_rows,dropped_rows
 shops,15,15,0
 products,100,100,0
-reviews,750,731,19
+reviews,769,750,19

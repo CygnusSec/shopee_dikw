@@ -22,12 +22,12 @@ review_text,WARNING,WARNING,19,Rating-only reviews remain raw but are excluded f
 review_provenance,WARNING,PASS,0,"Reviews should have URL, collection date, source and verification status"
 seller_key_unique,FAIL,PASS,0,Seller export key must be unique: ['Shop_ID']
 conversion_range,FAIL,PASS,0,"Observed conversion rate in [0,100]"
-conversion_missing,WARNING,WARNING,15,Missing Seller Centre conversion remains null
+conversion_missing,WARNING,PASS,0,Missing Seller Centre conversion remains null
 product_shop_fk,FAIL,PASS,0,Every product shop exists
 review_shop_fk,FAIL,PASS,0,Every review shop exists
 review_product_fk,FAIL,PASS,0,Every review product exists
 review_product_shop_match,FAIL,PASS,0,Review Shop_ID agrees with its product
 minimum_shops,WARNING,PASS,0,At least 15 real shops
 products_per_shop,WARNING,PASS,0,Each shop needs 5–10 products
-reviews_per_product,WARNING,WARNING,9,Each product needs at least five text reviews
+reviews_per_product,WARNING,PASS,0,Each product needs at least five text reviews
 seller_metrics_present,WARNING,WARNING,1,Observed authorized Seller Centre conversion is required
