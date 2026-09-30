@@ -1,5 +1,5 @@
 {
-  "input_fingerprint": "221537092a9652936278de5f4ef7eed93b026251ffd23a3c09a7172e54bcfa90",
+  "input_fingerprint": "4492150003866301d600af9db4ec8673f81d03d7f250aa4aa1e04b912fd24f64",
   "active_features": [
     "Years_Active",
     "Total_Products",
@@ -13,9 +13,9 @@
   "sample_size": 15,
   "train_rows": 12,
   "test_rows": 3,
-  "MAE": 188.05724575602946,
-  "RMSE": 211.97626296240006,
-  "R2": -14.527824710548225,
+  "MAE": 188.057245756029,
+  "RMSE": 211.9762629623995,
+  "R2": -14.527824710548142,
   "quality_acceptable": false,
   "interpretation_status": "exploratory_only",
   "quality_warnings": [

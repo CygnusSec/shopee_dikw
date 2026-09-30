@@ -4,31 +4,19 @@
     "MINIMUM_REAL_SHOPS": true,
     "PRODUCTS_PER_SHOP": true,
     "REVIEWS_PER_PRODUCT": false,
-    "REFERENTIAL_INTEGRITY": true,
-    "PRODUCT_PROVENANCE": true,
-    "REVIEW_PROVENANCE": true,
-    "REVIEW_RATING_COMPLETE": true,
-    "REVIEW_IMAGE_COMPLETE": true,
+    "REVIEW_METADATA_COMPLETE": true,
+    "PROVENANCE_COMPLETE": true,
     "SELLER_METRICS": false,
     "AUTHENTICITY_MAPPING": true,
-    "AUTHENTICITY_REPORT": true,
+    "AUTHENTICITY_REPORT": false,
     "CLASSIFICATION_RESULT": false,
     "CLASSIFICATION_ACCURACY": false,
     "CLASSIFICATION_MACRO_F1": false,
-    "REGRESSION_RESULT": true,
-    "WISDOM_FACTS": true,
+    "REGRESSION_RESULT": false,
+    "WISDOM_FACTS": false,
     "POWER_BI_VERIFIED": false,
     "FINAL_REPORT_10_PAGES": false,
     "COLAB_DRIVE_ACCESS": false
   },
-  "overall_ready": false,
-  "evidence": {
-    "shops": 15,
-    "products": 100,
-    "reviews": 750,
-    "text_reviews": 731,
-    "report_pages": 0,
-    "powerbi_file": null,
-    "input_fingerprint": "221537092a9652936278de5f4ef7eed93b026251ffd23a3c09a7172e54bcfa90"
-  }
+  "overall_ready": false
 }
