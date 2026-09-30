@@ -498,5 +498,195 @@
     "review_time": "2026-09-03",
     "review_text": "",
     "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "108041090942",
+    "user_name": "doan_hai86",
+    "rating": 5,
+    "review_time": "2026-09-01",
+    "review_text": "Màu sắc:đen xám\nĐúng với mô tả:chuẩn\nChất liệu:cao su\n\nĐúng mẫu mã sản phẩm giao hàng nhanh giá ok",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "106499515288",
+    "user_name": "tram.74",
+    "rating": 5,
+    "review_time": "2026-08-05",
+    "review_text": "Rất đẹp. Như mô tả. Size chuẩn. Sẽ ủng hộ",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "110600648187",
+    "user_name": "linhtran307",
+    "rating": 5,
+    "review_time": "2026-09-21",
+    "review_text": "Hàng nhận đúng mô tả, giao hàng nhanh, chất lượng tốt, cho shop 5 sao.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0001",
+    "user_name": "synthetic_user_1",
+    "rating": 5,
+    "review_time": "2026-07-07",
+    "review_text": "Sản phẩm đúng mô tả, rất ưng. Size vừa vặn, đi rất thoải mái. Giá tốt, đáng tiền.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0002",
+    "user_name": "synthetic_user_2",
+    "rating": 4,
+    "review_time": "2026-06-25",
+    "review_text": "Nhìn chung hài lòng. Form hơi ôm, nên lấy dư nửa size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0003",
+    "user_name": "synthetic_user_3",
+    "rating": 5,
+    "review_time": "2026-06-27",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0004",
+    "user_name": "synthetic_user_4",
+    "rating": 4,
+    "review_time": "2026-08-01",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Giày đẹp nhưng lúc đầu hơi cứng chân, đi vài lần thì ổn. Sẽ ủng hộ shop tiếp.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "synth_01_001_0005",
+    "user_name": "synthetic_user_5",
+    "rating": 5,
+    "review_time": "2026-07-19",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Giày êm chân, form chuẩn, đi cả ngày không mỏi.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "synth_01_001_0006",
+    "user_name": "synthetic_user_6",
+    "rating": 4,
+    "review_time": "2026-06-16",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Đi ổn, chất liệu nhẹ, giá hợp lý.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0007",
+    "user_name": "synthetic_user_7",
+    "rating": 5,
+    "review_time": "2026-09-25",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0008",
+    "user_name": "synthetic_user_8",
+    "rating": 5,
+    "review_time": "2026-07-18",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Giày êm chân, form chuẩn, đi cả ngày không mỏi.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0009",
+    "user_name": "synthetic_user_9",
+    "rating": 4,
+    "review_time": "2026-06-22",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Form hơi ôm, nên lấy dư nửa size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0010",
+    "user_name": "synthetic_user_10",
+    "rating": 4,
+    "review_time": "2026-08-03",
+    "review_text": "Nhìn chung hài lòng. Form hơi ôm, nên lấy dư nửa size. Sẽ ủng hộ shop tiếp.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0011",
+    "user_name": "synthetic_user_11",
+    "rating": 2,
+    "review_time": "2026-06-07",
+    "review_text": "Sản phẩm không như mong đợi lắm. Giày hơi chật, đi lâu bị đau chân.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "synth_01_001_0012",
+    "user_name": "synthetic_user_12",
+    "rating": 5,
+    "review_time": "2026-07-05",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "synth_01_001_0013",
+    "user_name": "synthetic_user_13",
+    "rating": 5,
+    "review_time": "2026-06-05",
+    "review_text": "Sản phẩm đúng mô tả, rất ưng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0014",
+    "user_name": "synthetic_user_14",
+    "rating": 5,
+    "review_time": "2026-09-02",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Giày êm chân, form chuẩn, đi cả ngày không mỏi. Giá tốt, đáng tiền.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0015",
+    "user_name": "synthetic_user_15",
+    "rating": 1,
+    "review_time": "2026-08-01",
+    "review_text": "Rất thất vọng. Size không chuẩn so với bảng size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0016",
+    "user_name": "synthetic_user_16",
+    "rating": 5,
+    "review_time": "2026-07-06",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Size vừa vặn, đi rất thoải mái.",
+    "has_image": 0
   }
 ]
