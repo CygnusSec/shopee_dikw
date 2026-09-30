@@ -254,9 +254,9 @@ items = {
     "SELLER_METRICS": bool(not seller_metrics.empty and observed_conversion.notna().all()),
     "AUTHENTICITY_MAPPING": bool(mapping) and set(map(float,mapping.values())) == {0.0,0.5,1.0},
     "AUTHENTICITY_REPORT": authenticity_ready,
-    "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
-    "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and float(metrics.get("accuracy",0)) > float(CONFIG["classification"]["accuracy_target"]),
-    "CLASSIFICATION_MACRO_F1": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and pd.notna(metrics.get("macro_f1")),
+    "CLASSIFICATION_RESULT": exists("output/reports/Classification_Result.csv") and metrics.get("input_fingerprint") == INPUT_FINGERPRINT and metrics.get("valid_ground_truth_evaluation") is True,
+    "CLASSIFICATION_ACCURACY": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and metrics.get("valid_ground_truth_evaluation") is True and float(metrics.get("accuracy",0)) > float(CONFIG["classification"]["accuracy_target"]),
+    "CLASSIFICATION_MACRO_F1": metrics.get("input_fingerprint") == INPUT_FINGERPRINT and metrics.get("valid_ground_truth_evaluation") is True and pd.notna(metrics.get("macro_f1")),
     "REGRESSION_RESULT": exists("output/reports/Regression_Result.csv") and regression_metrics.get("input_fingerprint") == INPUT_FINGERPRINT,
     "WISDOM_FACTS": wisdom.get("input_fingerprint") == INPUT_FINGERPRINT,
     "POWER_BI_VERIFIED": powerbi_verified,
@@ -511,9 +511,41 @@ from sklearn.model_selection import train_test_split
 source = OUTPUT / "labeling" / "Data_Labeled.csv"
 features = ["Years_Active","Total_Products","Follower_Count_k","Rating_Average","Chat_Response_Rate_pct","Authentic_Review_Rate","Conversion_Rate_pct"]
 required_review = ["Labeler","Label_Reason","Review_Status"]
+label_mode = CONFIG["classification"].get("label_mode", "manual")
+label_source = "human_reviewed"
 reasons = []
 data = pd.DataFrame()
-if not source.exists():
+if label_mode == "pseudo":
+    label_source = "rule_based_pseudo_label"
+    data = pd.read_csv(OUTPUT / "labeling" / "Data_To_Label.csv")
+    score_spec = {
+        "Rating_Average": .30,
+        "Chat_Response_Rate_pct": .25,
+        "Authentic_Review_Rate": .20,
+        "Follower_Count_k": .15,
+        "Sales": .10,
+    }
+    score_parts = []
+    used_weights = []
+    from sklearn.preprocessing import MinMaxScaler
+    for column, weight in score_spec.items():
+        values = pd.to_numeric(data.get(column), errors="coerce")
+        if values.notna().any() and values.nunique(dropna=True) >= 2:
+            values = values.fillna(values.median())
+            if column in {"Follower_Count_k", "Sales"}: values = np.log1p(values.clip(lower=0))
+            score_parts.append(MinMaxScaler().fit_transform(values.to_frame()).ravel() * weight)
+            used_weights.append(weight)
+    if not score_parts:
+        reasons.append("No usable fields are available to create pseudo-label proposals")
+    else:
+        data["Auto_Label_Score"] = np.sum(score_parts, axis=0) / sum(used_weights)
+        data["Target_Label"] = pd.qcut(data["Auto_Label_Score"].rank(method="first"), q=3, labels=[0,1,2]).astype(int)
+        data["Labeler"] = "AUTO_RULE"
+        data["Label_Reason"] = data.apply(lambda row: f"Rule-based pseudo-label; score={row['Auto_Label_Score']:.4f}", axis=1)
+        data["Review_Status"] = "pseudo"
+        data.to_csv(OUTPUT / "labeling" / "Data_Label_Proposals.csv", index=False, encoding="utf-8-sig")
+        print("PSEUDO-LABEL MODE: proposals are not human ground truth and model metrics are not independent validation.")
+elif not source.exists():
     reasons.append("Save the reviewed Data_To_Label.csv as output/labeling/Data_Labeled.csv")
 else:
     data = pd.read_csv(source)
@@ -531,26 +563,29 @@ else:
             approved = data["Review_Status"].fillna("").astype(str).str.strip().str.lower().eq("approved")
             documented = data[["Labeler","Label_Reason"]].fillna("").astype(str).apply(lambda s:s.str.strip().ne("")).all(axis=1)
             if not (approved & documented).all(): reasons.append(f"{int((~(approved & documented)).sum())} labeled rows are not approved/documented")
-            for feature in features:
-                if feature not in data: data[feature] = np.nan
-            feature_coverage = pd.DataFrame({
-                "Feature":features,
-                "Observed_Count":[pd.to_numeric(data[c],errors="coerce").notna().sum() for c in features],
-                "Observed_Rate":[pd.to_numeric(data[c],errors="coerce").notna().mean() for c in features],
-                "Unique_Observed_Values":[pd.to_numeric(data[c],errors="coerce").nunique(dropna=True) for c in features],
-            })
-            feature_coverage["Usable"] = (feature_coverage["Observed_Rate"] == 1.0) & (feature_coverage["Unique_Observed_Values"] >= 2)
-            active_features = feature_coverage.loc[feature_coverage["Usable"],"Feature"].tolist()
-            excluded_features = [c for c in features if c not in active_features]
-            feature_coverage.to_csv(OUTPUT/"reports"/"classification_feature_coverage.csv",index=False)
-            if not active_features: reasons.append("No model feature has complete observed values and variation")
-            counts = data["Target_Label"].value_counts().reindex([0,1,2],fill_value=0)
-            minimum = CONFIG["classification"]["minimum_shops_per_class"]
-            if (counts < minimum).any(): reasons.append(f"Need at least {minimum} shops per class; found {counts.to_dict()}")
+
+if not data.empty and "Target_Label" in data and pd.to_numeric(data["Target_Label"], errors="coerce").notna().any():
+    data["Target_Label"] = pd.to_numeric(data["Target_Label"], errors="coerce").astype(int)
+    for feature in features:
+        if feature not in data: data[feature] = np.nan
+    feature_coverage = pd.DataFrame({
+        "Feature":features,
+        "Observed_Count":[pd.to_numeric(data[c],errors="coerce").notna().sum() for c in features],
+        "Observed_Rate":[pd.to_numeric(data[c],errors="coerce").notna().mean() for c in features],
+        "Unique_Observed_Values":[pd.to_numeric(data[c],errors="coerce").nunique(dropna=True) for c in features],
+    })
+    feature_coverage["Usable"] = (feature_coverage["Observed_Rate"] == 1.0) & (feature_coverage["Unique_Observed_Values"] >= 2)
+    active_features = feature_coverage.loc[feature_coverage["Usable"],"Feature"].tolist()
+    excluded_features = [c for c in features if c not in active_features]
+    feature_coverage.to_csv(OUTPUT/"reports"/"classification_feature_coverage.csv",index=False)
+    if not active_features: reasons.append("No model feature has complete observed values and variation")
+    counts = data["Target_Label"].value_counts().reindex([0,1,2],fill_value=0)
+    minimum = CONFIG["classification"]["minimum_shops_per_class"]
+    if (counts < minimum).any(): reasons.append(f"Need at least {minimum} shops per class; found {counts.to_dict()}")
 
 active_features = locals().get("active_features", [])
 excluded_features = locals().get("excluded_features", features)
-readiness = pd.DataFrame([{"ready":not reasons,"labeled_rows":len(data),"active_features":", ".join(active_features),"excluded_features":", ".join(excluded_features),"blockers":" | ".join(reasons)}])
+readiness = pd.DataFrame([{"ready":not reasons,"label_mode":label_mode,"label_source":label_source,"valid_ground_truth_evaluation":label_mode == "manual","labeled_rows":len(data),"active_features":", ".join(active_features),"excluded_features":", ".join(excluded_features),"blockers":" | ".join(reasons)}])
 readiness.to_csv(OUTPUT/"reports"/"classification_readiness.csv",index=False)
 display(readiness)
 
@@ -567,7 +602,7 @@ else:
     dummy = DummyClassifier(strategy="most_frequent").fit(train[active_features],train["Target_Label"])
     prediction = model.predict(test[active_features]); probability = model.predict_proba(test[active_features]).max(axis=1)
     macro = precision_recall_fscore_support(test["Target_Label"],prediction,average="macro",zero_division=0)
-    metrics = {"input_fingerprint":INPUT_FINGERPRINT,"active_features":active_features,"excluded_features":excluded_features,"accuracy":accuracy_score(test["Target_Label"],prediction),"baseline_accuracy":accuracy_score(test["Target_Label"],dummy.predict(test[active_features])),"macro_precision":macro[0],"macro_recall":macro[1],"macro_f1":macro[2],"weighted_f1":precision_recall_fscore_support(test["Target_Label"],prediction,average="weighted",zero_division=0)[2],"target_accuracy":CONFIG["classification"]["accuracy_target"]}
+    metrics = {"input_fingerprint":INPUT_FINGERPRINT,"label_mode":label_mode,"label_source":label_source,"valid_ground_truth_evaluation":label_mode == "manual","active_features":active_features,"excluded_features":excluded_features,"accuracy":accuracy_score(test["Target_Label"],prediction),"baseline_accuracy":accuracy_score(test["Target_Label"],dummy.predict(test[active_features])),"macro_precision":macro[0],"macro_recall":macro[1],"macro_f1":macro[2],"weighted_f1":precision_recall_fscore_support(test["Target_Label"],prediction,average="weighted",zero_division=0)[2],"target_accuracy":CONFIG["classification"]["accuracy_target"]}
     metrics["pass_accuracy_requirement"] = metrics["accuracy"] > metrics["target_accuracy"]
     cm = confusion_matrix(test["Target_Label"],prediction,labels=[0,1,2])
     fig,ax=plt.subplots(); sns.heatmap(cm,annot=True,fmt="d",xticklabels=[0,1,2],yticklabels=[0,1,2],ax=ax); ax.set(xlabel="Predicted",ylabel="Actual",title="Confusion matrix"); fig.tight_layout(); fig.savefig(OUTPUT/"figures"/"confusion_matrix.png",dpi=160); plt.show(); plt.close(fig)

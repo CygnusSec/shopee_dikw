@@ -1,0 +1,25 @@
+{
+  "input_fingerprint": "221537092a9652936278de5f4ef7eed93b026251ffd23a3c09a7172e54bcfa90",
+  "label_mode": "pseudo",
+  "label_source": "rule_based_pseudo_label",
+  "valid_ground_truth_evaluation": false,
+  "active_features": [
+    "Years_Active",
+    "Total_Products",
+    "Follower_Count_k",
+    "Rating_Average",
+    "Chat_Response_Rate_pct",
+    "Authentic_Review_Rate"
+  ],
+  "excluded_features": [
+    "Conversion_Rate_pct"
+  ],
+  "accuracy": 0.6666666666666666,
+  "baseline_accuracy": 0.3333333333333333,
+  "macro_precision": 0.5,
+  "macro_recall": 0.6666666666666666,
+  "macro_f1": 0.5555555555555555,
+  "weighted_f1": 0.5555555555555555,
+  "target_accuracy": 0.75,
+  "pass_accuracy_requirement": false
+}

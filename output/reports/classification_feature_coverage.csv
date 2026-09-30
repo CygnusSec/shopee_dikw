@@ -1,0 +1,8 @@
+Feature,Observed_Count,Observed_Rate,Unique_Observed_Values,Usable
+Years_Active,15,1.0,6,True
+Total_Products,15,1.0,15,True
+Follower_Count_k,15,1.0,15,True
+Rating_Average,15,1.0,5,True
+Chat_Response_Rate_pct,15,1.0,10,True
+Authentic_Review_Rate,15,1.0,11,True
+Conversion_Rate_pct,0,0.0,0,False

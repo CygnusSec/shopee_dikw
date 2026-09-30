@@ -1,2 +1,2 @@
-ready,labeled_rows,active_features,excluded_features,blockers
-False,0,,"Years_Active, Total_Products, Follower_Count_k, Rating_Average, Chat_Response_Rate_pct, Authentic_Review_Rate, Conversion_Rate_pct","Data_Labeled.csv has no labeled rows; assign Target_Label 0, 1 or 2"
+ready,label_mode,label_source,valid_ground_truth_evaluation,labeled_rows,active_features,excluded_features,blockers
+True,pseudo,rule_based_pseudo_label,False,15,"Years_Active, Total_Products, Follower_Count_k, Rating_Average, Chat_Response_Rate_pct, Authentic_Review_Rate",Conversion_Rate_pct,
