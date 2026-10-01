@@ -1,1 +1,692 @@
-[]
+[
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "109983412982",
+    "user_name": "lamdang0606",
+    "rating": 5,
+    "review_time": "2026-09-16",
+    "review_text": "Giao hàng nhanh, gia thay đổi liên tục dc giảm giá nen gia tốt",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "107178569425",
+    "user_name": "t*****0",
+    "rating": 5,
+    "review_time": "2026-08-17",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "108155090264",
+    "user_name": "phuongshopee12",
+    "rating": 5,
+    "review_time": "2026-09-02",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "107251833045",
+    "user_name": "dulethi",
+    "rating": 5,
+    "review_time": "2026-08-21",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "109893496787",
+    "user_name": "d*****g",
+    "rating": 5,
+    "review_time": "2026-09-15",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "33289968676",
+    "user_name": "p*****i",
+    "rating": 5,
+    "review_time": "2025-03-19",
+    "review_text": "Đúng mô tả màu đẹp đóng gói cẩn thận giao hàng khá nhanh",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "85592334475",
+    "user_name": "teoem1605",
+    "rating": 5,
+    "review_time": "2026-01-17",
+    "review_text": "Vừa chân ạ",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "93899805506",
+    "user_name": "trangks803",
+    "rating": 5,
+    "review_time": "2026-03-30",
+    "review_text": "giày đẹp, gói cẩn thận, hộp đẹp",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "32509891849",
+    "user_name": "gfpxrvly3i",
+    "rating": 2,
+    "review_time": "2025-03-09",
+    "review_text": "Giày chính hãng kiểu gì mà gửi dây buộc dày bên ngắn bên dài.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "83204181668",
+    "user_name": "m*****1",
+    "rating": 5,
+    "review_time": "2025-12-27",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "38830151355",
+    "user_name": "h*****p",
+    "rating": 5,
+    "review_time": "2025-04-24",
+    "review_text": "Dép bánh mỳ dễ thương, hơi nặng xíu. Chân 280 đi vừa. Màu sáng đẹp hơn nhưng dễ bẩn",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "107066928449",
+    "user_name": "haithanh1197",
+    "rating": 5,
+    "review_time": "2026-08-12",
+    "review_text": "Ok, chất liệu ổn, đi nặng chân đầm, đúng hàng xịn, ko như những mẫu dép kháv",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "54301543091",
+    "user_name": "minhnguyen12592",
+    "rating": 5,
+    "review_time": "2025-06-26",
+    "review_text": "Sản phẩm rất ổn. Đã mua nhiều lần. Đa dụng lắm . Cảm ơn shop nhiều nhé",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "110907408081",
+    "user_name": "y*****8",
+    "rating": 5,
+    "review_time": "2026-09-23",
+    "review_text": "Shop giao hàng nhanh, dép mang êm, size vừa đúng, chất liệu tốt.",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "106148225030",
+    "user_name": "l*****e",
+    "rating": 5,
+    "review_time": "2026-08-02",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "107062359039",
+    "user_name": "huongxu2810",
+    "rating": 5,
+    "review_time": "2026-08-12",
+    "review_text": "",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "107114978682",
+    "user_name": "p_house95",
+    "rating": 5,
+    "review_time": "2026-08-14",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "107359503769",
+    "user_name": "y8h602fk8n",
+    "rating": 5,
+    "review_time": "2026-08-26",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "106726080656",
+    "user_name": "doanquoc881",
+    "rating": 5,
+    "review_time": "2026-08-06",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "105013102228",
+    "user_name": "4e_ogy9cek",
+    "rating": 5,
+    "review_time": "2026-07-21",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_005",
+    "review_id": "78950243864",
+    "user_name": "nquyenhoanqlam",
+    "rating": 5,
+    "review_time": "2025-11-14",
+    "review_text": "Sản phẩm đúng mô tả, đóng gói cẩn thận , giao hàng nhanh",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_005",
+    "review_id": "104111040559",
+    "user_name": "t*****n",
+    "rating": 5,
+    "review_time": "2026-07-09",
+    "review_text": "hàng chính hãng, date 2025, giày đẹp, không lỗi, chỉn chu, giao hàng nhanh",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_005",
+    "review_id": "104110926602",
+    "user_name": "t*****n",
+    "rating": 5,
+    "review_time": "2026-07-09",
+    "review_text": "hàng chính hãng, date 2025, giày đẹp, không lỗi, chỉn chu, giao hàng nhanh",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_005",
+    "review_id": "88710870087",
+    "user_name": "t*****0",
+    "rating": 5,
+    "review_time": "2026-02-14",
+    "review_text": "Hình ảnh mang tính chất nhận xu. Shop giao hàng nhanh, đóng hàng cẩn thận. Sẽ tiếp tục ủng hộ.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_005",
+    "review_id": "87043226639",
+    "user_name": "duy1132002",
+    "rating": 5,
+    "review_time": "2026-01-31",
+    "review_text": "Tốt yêu thương nhiêu lắm\nCảm ơn shop nhé\nChúc shop may mắn bán đắt hàng",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "98951860343",
+    "user_name": "p*****1",
+    "rating": 5,
+    "review_time": "2026-05-21",
+    "review_text": "đáng để mua nhé mng ơi",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "61891464890",
+    "user_name": "thebuomhello",
+    "rating": 5,
+    "review_time": "2025-07-20",
+    "review_text": "giày đẹp chính hãng, giá tốt",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "52862960235",
+    "user_name": "j*****8",
+    "rating": 5,
+    "review_time": "2025-06-23",
+    "review_text": "Giá sale tốt. Giày hơi rộng chút. Ship hàng khá lâu",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "48395364412",
+    "user_name": "info.antinhshop",
+    "rating": 5,
+    "review_time": "2025-06-13",
+    "review_text": "Đúng với mô tả",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "47590492367",
+    "user_name": "hmnw9ojf6j",
+    "rating": 5,
+    "review_time": "2025-06-09",
+    "review_text": "",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "107929641479",
+    "user_name": "hothuongnhan",
+    "rating": 5,
+    "review_time": "2026-08-30",
+    "review_text": "Thời gian đầu mới đi (khoảng 1-2 tuần đầu) da hoặc vải có thể hơi cứng và dễ gây đau gót. Tuy nhiên, khi giày đã \"bợt\" (break-in) theo form chân thì đi lại khá thoải mái. Nếu muốn êm chân hơn, bạn nên chọn các dòng có lót cải tiến như Converse Chuck 70 vì đệm lót dày và êm hơn hẳn dòng Classic.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "59411352169",
+    "user_name": "d*****4",
+    "rating": 5,
+    "review_time": "2025-07-12",
+    "review_text": "Mua đợt xả hàng, rẻ, chính hãng khách yên tâm.  Hộp tag đầy đủ",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "46624192910",
+    "user_name": "ltxltx",
+    "rating": 5,
+    "review_time": "2025-06-06",
+    "review_text": "Giày xinh chính hãng mọi người nên mua nha. Mình siêu ưng ý",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "72860683574",
+    "user_name": "uyvu1502",
+    "rating": 3,
+    "review_time": "2025-09-12",
+    "review_text": "Shop giao hàng quá cẩu thả,giày bị lốm đốm mốc trắng như bị ẩm mốc...haizzz",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "55146758555",
+    "user_name": "neoldq",
+    "rating": 4,
+    "review_time": "2025-06-28",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "110916929618",
+    "user_name": "ze0rcebs69",
+    "rating": 5,
+    "review_time": "2026-09-23",
+    "review_text": "It is good and this product is genuine.",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "93899207873",
+    "user_name": "p*****6",
+    "rating": 5,
+    "review_time": "2026-03-30",
+    "review_text": "Giày đẹp, đi lại thoải mái, chứ đừng phù hợp đi chơi, đi thể thao",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "92632160096",
+    "user_name": "jinchaihu",
+    "rating": 5,
+    "review_time": "2026-03-19",
+    "review_text": "Mình thường mang giày này nhìn rất cá tính, phối đồ đi làm hay đi chơi rất dễ. \nShop đóng gói giày rất kỹ và giao hàng nhanh.",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "37156104437",
+    "user_name": "a*****5",
+    "rating": 5,
+    "review_time": "2025-04-15",
+    "review_text": "sản phẩm rất đẹp, rất chắc chắn, giao hàng siêu nhanh, mọi người nên mua nha",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "94231781804",
+    "user_name": "t*****1",
+    "rating": 5,
+    "review_time": "2026-04-02",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "80831993921",
+    "user_name": "tin7880",
+    "rating": 5,
+    "review_time": "2025-12-07",
+    "review_text": "Xinh lắm, mua tặng ng ta rất thích, êm chân lắm luôn, thích màu đen mà hết size, buồn ghê",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "91581933893",
+    "user_name": "vuongnam.vn",
+    "rating": 5,
+    "review_time": "2026-03-11",
+    "review_text": "hàng giao nhanh, mua rẻ hơn ở cua hang, đong gói tốt",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "45072692154",
+    "user_name": "hgiang2224",
+    "rating": 5,
+    "review_time": "2025-05-29",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "82227541885",
+    "user_name": "ellisereyes895",
+    "rating": 5,
+    "review_time": "2025-12-19",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "93837598996",
+    "user_name": "oswin111",
+    "rating": 5,
+    "review_time": "2026-03-29",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "108552576970",
+    "user_name": "nguyen_trong_phu",
+    "rating": 5,
+    "review_time": "2026-09-05",
+    "review_text": "Dép màn cứng cáp, êm chân. Giá cả hợp lý. Dép đẹp vừa ý. Nên mua sử dụng hàng ngày, đi làm đều được. Rất thích.",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "107265278603",
+    "user_name": "1z1gh7fd1k",
+    "rating": 5,
+    "review_time": "2026-08-21",
+    "review_text": "Dép tốt, đi êm và chắc chân. Đi số 7 thì hơi chật, số 8 thì hơi rộng. Thấy trong bảng size có số 7,5 mà cửa hàng không thấy bán, nếu có thì vừa chân hơn.",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "110263921056",
+    "user_name": "o0traudaica0o",
+    "rating": 5,
+    "review_time": "2026-09-18",
+    "review_text": "Giống mô tả, mang thoải nái mặc dù hơi rộng nhẹ",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "107329019117",
+    "user_name": "manhchien2009",
+    "rating": 5,
+    "review_time": "2026-08-24",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "108305809551",
+    "user_name": "59rq7puox0",
+    "rating": 5,
+    "review_time": "2026-09-03",
+    "review_text": "",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "108041090942",
+    "user_name": "doan_hai86",
+    "rating": 5,
+    "review_time": "2026-09-01",
+    "review_text": "Màu sắc:đen xám\nĐúng với mô tả:chuẩn\nChất liệu:cao su\n\nĐúng mẫu mã sản phẩm giao hàng nhanh giá ok",
+    "has_image": 1
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_010",
+    "review_id": "106499515288",
+    "user_name": "tram.74",
+    "rating": 5,
+    "review_time": "2026-08-05",
+    "review_text": "Rất đẹp. Như mô tả. Size chuẩn. Sẽ ủng hộ",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_006",
+    "review_id": "110600648187",
+    "user_name": "linhtran307",
+    "rating": 5,
+    "review_time": "2026-09-21",
+    "review_text": "Hàng nhận đúng mô tả, giao hàng nhanh, chất lượng tốt, cho shop 5 sao.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0001",
+    "user_name": "synthetic_user_1",
+    "rating": 5,
+    "review_time": "2026-07-07",
+    "review_text": "Sản phẩm đúng mô tả, rất ưng. Size vừa vặn, đi rất thoải mái. Giá tốt, đáng tiền.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0002",
+    "user_name": "synthetic_user_2",
+    "rating": 4,
+    "review_time": "2026-06-25",
+    "review_text": "Nhìn chung hài lòng. Form hơi ôm, nên lấy dư nửa size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0003",
+    "user_name": "synthetic_user_3",
+    "rating": 5,
+    "review_time": "2026-06-27",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_001",
+    "review_id": "synth_01_001_0004",
+    "user_name": "synthetic_user_4",
+    "rating": 4,
+    "review_time": "2026-08-01",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Giày đẹp nhưng lúc đầu hơi cứng chân, đi vài lần thì ổn. Sẽ ủng hộ shop tiếp.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_002",
+    "review_id": "synth_01_001_0005",
+    "user_name": "synthetic_user_5",
+    "rating": 5,
+    "review_time": "2026-07-19",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Giày êm chân, form chuẩn, đi cả ngày không mỏi.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_003",
+    "review_id": "synth_01_001_0006",
+    "user_name": "synthetic_user_6",
+    "rating": 4,
+    "review_time": "2026-06-16",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Đi ổn, chất liệu nhẹ, giá hợp lý.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0007",
+    "user_name": "synthetic_user_7",
+    "rating": 5,
+    "review_time": "2026-09-25",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0008",
+    "user_name": "synthetic_user_8",
+    "rating": 5,
+    "review_time": "2026-07-18",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Giày êm chân, form chuẩn, đi cả ngày không mỏi.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0009",
+    "user_name": "synthetic_user_9",
+    "rating": 4,
+    "review_time": "2026-06-22",
+    "review_text": "Giao hàng ổn, hơi lâu một chút. Form hơi ôm, nên lấy dư nửa size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0010",
+    "user_name": "synthetic_user_10",
+    "rating": 4,
+    "review_time": "2026-08-03",
+    "review_text": "Nhìn chung hài lòng. Form hơi ôm, nên lấy dư nửa size. Sẽ ủng hộ shop tiếp.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_004",
+    "review_id": "synth_01_001_0011",
+    "user_name": "synthetic_user_11",
+    "rating": 2,
+    "review_time": "2026-06-07",
+    "review_text": "Sản phẩm không như mong đợi lắm. Giày hơi chật, đi lâu bị đau chân.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_007",
+    "review_id": "synth_01_001_0012",
+    "user_name": "synthetic_user_12",
+    "rating": 5,
+    "review_time": "2026-07-05",
+    "review_text": "Mua lần thứ hai rồi, vẫn hài lòng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_008",
+    "review_id": "synth_01_001_0013",
+    "user_name": "synthetic_user_13",
+    "rating": 5,
+    "review_time": "2026-06-05",
+    "review_text": "Sản phẩm đúng mô tả, rất ưng. Đường may chắc chắn, màu đẹp y như hình.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0014",
+    "user_name": "synthetic_user_14",
+    "rating": 5,
+    "review_time": "2026-09-02",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Giày êm chân, form chuẩn, đi cả ngày không mỏi. Giá tốt, đáng tiền.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0015",
+    "user_name": "synthetic_user_15",
+    "rating": 1,
+    "review_time": "2026-08-01",
+    "review_text": "Rất thất vọng. Size không chuẩn so với bảng size.",
+    "has_image": 0
+  },
+  {
+    "Shop_ID": "01_001",
+    "product_id": "sp_01_001_009",
+    "review_id": "synth_01_001_0016",
+    "user_name": "synthetic_user_16",
+    "rating": 5,
+    "review_time": "2026-07-06",
+    "review_text": "Giao hàng nhanh, đóng gói cẩn thận. Size vừa vặn, đi rất thoải mái.",
+    "has_image": 0
+  }
+]

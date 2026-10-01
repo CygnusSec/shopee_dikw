@@ -1,0 +1,12 @@
+reviews_per_product: 5
+page_size: 20
+max_pages: 20
+timeout_ms: 90000
+retry_attempts: 3
+backoff_seconds: 2.0
+request_delay_min_seconds: 5.0
+request_delay_max_seconds: 10.0
+headless: false
+resume: true
+dry_run: false
+save_sanitized_raw: true
