@@ -11,4 +11,3 @@ jupyter>=1.0,<2
 nbclient>=0.9,<1
 playwright>=1.48,<2
 pytest>=8,<9
-jsonschema>=4.20,<5

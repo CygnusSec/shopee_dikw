@@ -10,7 +10,7 @@
 
 ## 1. Thông tin nhóm và phân công
 
-Insert the reviewed contribution table from `docs/contribution_matrix.md`.
+Insert the final contribution table reviewed and approved by the group.
 
 ## 2. Mục tiêu và phương pháp DIKW
 
@@ -54,4 +54,4 @@ Summarize supported findings and propose improvements without overstating result
 
 ## Phụ lục
 
-Include the data dictionary, labeling rubric, contribution matrix, configuration, and artifact checklist.
+Include the final contribution matrix, configuration, and artifact checklist used for the submitted run.

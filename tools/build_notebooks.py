@@ -123,7 +123,8 @@ if "product_details" in products:
     products["units_sold_semantics"] = products["units_sold"].notna().map({True: "public_display_lower_bound", False: None})
 products["Data_Source"] = products["Data_Source"].fillna(products["product_url"])
 for column in REVIEW_REQUIRED:
-    if column not in reviews: reviews[column] = np.nan
+    if column not in reviews:
+        reviews[column] = pd.Series(pd.NA, index=reviews.index, dtype="object") if column in {"source_url", "Time_Collected", "Data_Source", "Verification_Status"} else np.nan
 if "collection_date" in reviews: reviews["Time_Collected"] = reviews["Time_Collected"].fillna(reviews["collection_date"])
 # Reviews were collected from each product's public review endpoint/page.  Link
 # provenance through product_id in memory so the immutable raw JSON is not

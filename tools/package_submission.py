@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE = ("Shopee_Dataset", "src", "config", "docs", "output/reports", "output/powerbi", "powerbi", "report", "submission", "README.md", "requirements.txt")
+INCLUDE = ("Shopee_Dataset", "src", "config", "output/reports", "output/powerbi", "powerbi", "report", "submission", "README.md", "requirements.txt")
 EXCLUDED_PARTS = {".venv", "__pycache__", ".pytest_cache", ".shopee_browser_profile", ".auth", "crawl", "logs", "models"}
 EXCLUDED_NAMES = {".DS_Store", "seller_center_metrics.csv", "seller_center_metrics.xlsx", "verification.example.json", "submission_metadata.example.yaml"}
 EXCLUDED_SUFFIXES = {".pyc", ".cookies.json", ".cookies.txt", ".zip"}

@@ -1,8 +1,5 @@
 import importlib.util
-import json
 from pathlib import Path
-
-from jsonschema import Draft202012Validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,18 +23,6 @@ def test_current_repository_is_truthfully_not_ready():
     assert result["evidence"]["reviews"] >= result["evidence"]["text_reviews"]
     assert result["checks"]["MINIMUM_REAL_SHOPS"]
     assert "OVERALL: NOT READY FOR SUBMISSION" in checker.render(result)
-
-
-def test_review_schema_allows_explicit_unverified_nulls():
-    schema = json.loads((ROOT / "docs/review_schema.json").read_text(encoding="utf-8"))
-    Draft202012Validator.check_schema(schema)
-    row = {
-        "Shop_ID": "01_001", "product_id": "sp_1", "review_id": "rv_1",
-        "user_name": "buyer", "rating": None, "review_time": None,
-        "review_text": "real text", "has_image": None,
-        "Data_Source": "manual public-page transcription",
-    }
-    Draft202012Validator(schema).validate([row])
 
 
 def test_package_list_excludes_private_and_runtime_artifacts():

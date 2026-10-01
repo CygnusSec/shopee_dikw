@@ -1,2 +1,0 @@
-ready,label_mode,label_source,valid_ground_truth_evaluation,labeled_rows,active_features,excluded_features,blockers
-True,pseudo,rule_based_pseudo_label,False,15,"Years_Active, Total_Products, Follower_Count_k, Rating_Average, Chat_Response_Rate_pct, Authentic_Review_Rate",Conversion_Rate_pct,

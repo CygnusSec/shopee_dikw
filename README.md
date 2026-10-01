@@ -2,7 +2,7 @@
 
 Reproducible validation and analytics pipeline for Shop, Product, and Review data. It never overwrites raw inputs or fabricates missing business fields, cluster meanings, or class labels.
 
-The seven submission notebooks are stored in `src/` and are self-contained. They implement loading, validation, cleaning, sentiment, EDA, clustering, classification, regression, and final DIKW analysis. `tools/build_notebooks.py` is development tooling only; the submitted analysis does not import it.
+The seven stage notebooks are stored in `src/` and are self-contained. They implement loading, validation, cleaning, sentiment, EDA, clustering, classification, regression, and final DIKW analysis. `src/Shopee_DIKW_Colab.ipynb` combines those seven stages into one Colab-ready notebook. Development builders are not imported by submitted notebooks.
 
 ## Setup
 
@@ -24,7 +24,14 @@ Add at least 15 genuine shops, 5–10 products per shop, five text reviews per p
 
 ## Google Colab
 
-Upload the project to Drive, open a notebook, mount Drive if needed, set only `PROJECT_ROOT = Path('.')` (or the project folder), install requirements, and Run All. All project paths are relative/config-based.
+1. Upload the **entire project folder** to `MyDrive/shopee_dikw`; uploading only the notebook is insufficient because datasets and configuration remain external files.
+2. Open `src/Shopee_DIKW_Colab.ipynb` in Colab.
+3. If the Drive folder differs, edit only `COLAB_PROJECT_ROOT` in the first code cell.
+4. Run All. The notebook mounts Drive, installs only missing analysis dependencies, and executes stages `00 → 06`.
+
+Clustering interpretation and shop labeling remain human gates: inspect the generated files, update the mapping/labels in Drive, then rerun from the relevant stage. Crawling is excluded from the combined Colab notebook because it requires a local interactive Chromium session; the original crawler notebooks remain under `src/crawl_data/`.
+
+The `output/` tree contains generated run artifacts and is intentionally excluded from Git. Recreate it by running the notebooks; do not commit stale model results.
 
 ## Known submission blockers
 
